@@ -6,29 +6,44 @@
 class Ingredient {
 protected:
     std::string name;
-    double volumeMl;
+    int volumeMl;
     double basePrice;
 
 public:
+    Ingredient(std::string name, int volumeMl, double basePrice);
     virtual ~Ingredient() = default;
 
-    // TODO: add constructors, getters, and common ingredient behavior.
-    virtual double getABV() const = 0;
+    [[nodiscard]] std::string getName() const;
+    [[nodiscard]] int getVolumeMl() const;
+    [[nodiscard]] double getBasePrice() const;
+    [[nodiscard]] virtual double getABV() const = 0;
 };
 
 class Alcohol : public Ingredient {
 private:
     double abv;
+
+public:
+    Alcohol(std::string name, int volumeMl, double basePrice, double abv);
+    [[nodiscard]] double getABV() const override;
 };
 
 class Mixer : public Ingredient {
 private:
     double sweetness;
+
+public:
+    Mixer(std::string name, int volumeMl, double basePrice, double sweetness);
+
+    [[nodiscard]] double getSweetness() const;
+    [[nodiscard]] double getABV() const override;
 };
 
 class Garnish : public Ingredient {
-private:
-    bool chilled;
+public:
+    Garnish(std::string name, int volumeMl, double basePrice);
+
+    [[nodiscard]] double getABV() const override;
 };
 
 #endif
