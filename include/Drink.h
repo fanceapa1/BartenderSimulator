@@ -15,9 +15,12 @@ protected:
     double capacityMl;
 
 public:
+    Drink();
+    Drink(std::string name, double capacityMl);
     virtual ~Drink() = default;
 
-    // TODO: add constructors and shared drink behavior.
+    [[nodiscard]] const std::string& getName() const;
+    [[nodiscard]] double getCapacityMl() const;
 };
 
 class Recipe : public Drink {
@@ -26,9 +29,20 @@ private:
     double menuPrice;
 
 public:
-    // TODO: implement recipe input/output once the file format is decided.
+    Recipe();
+    Recipe(std::string name, double menuPrice, double capacityMl);
+    Recipe(std::string name,
+           double menuPrice,
+           double capacityMl,
+           std::vector<std::pair<std::string, double>> ingredientRatios);
+
+    [[nodiscard]] double getMenuPrice() const;
+    [[nodiscard]] const std::vector<std::pair<std::string, double>>& getIngredientRatios() const;
+
     friend std::ostream& operator<<(std::ostream& out, const Recipe& recipe);
     friend std::istream& operator>>(std::istream& in, Recipe& recipe);
+
+    [[nodiscard]] double getABV() const;
 };
 
 class Concoction : public Drink {
@@ -38,6 +52,12 @@ private:
     std::size_t ingredientCapacity;
 
 public:
+    Concoction();
+    Concoction(std::string name, double capacityMl);
+
+    [[nodiscard]] std::size_t getIngredientCount() const;
+    [[nodiscard]] std::size_t getIngredientCapacity() const;
+
     // TODO: implement Rule of Three/Five here.
     // TODO: add pour(), serve-related helpers, and operator+= later.
 };
