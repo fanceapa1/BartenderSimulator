@@ -1,6 +1,7 @@
 #include "Drink.h"
 
 #include <istream>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -42,6 +43,34 @@ double getKnownIngredientABV(const std::string& ingredientName) {
     }
 
     return 0;
+}
+
+Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int amount) {
+    if(ingredientName == "Gin") {
+        return new Alcohol(ingredientName, amount, 0, 0.40);
+    }
+
+    if(ingredientName == "Vermouth") {
+        return new Alcohol(ingredientName, amount, 0, 0.15);
+    }
+
+    if(ingredientName == "Tonic") {
+        return new Mixer(ingredientName, amount, 0, 0.20);
+    }
+
+    if(ingredientName == "Orange Juice") {
+        return new Mixer(ingredientName, amount, 0, 0.80);
+    }
+
+    if(ingredientName == "Ice") {
+        return new Garnish(ingredientName, amount * 25, 0);
+    }
+
+    if(ingredientName == "Lemon") {
+        return new Garnish(ingredientName, amount * 10, 0);
+    }
+
+    return nullptr;
 }
 }
 
@@ -179,10 +208,101 @@ Concoction::Concoction(std::string name, double capacityMl)
     : Drink(std::move(name), capacityMl), ingredients(nullptr), ingredientCount(0), ingredientCapacity(0) {
 }
 
+Concoction::~Concoction() {
+    clearIngredients();
+}
+
 std::size_t Concoction::getIngredientCount() const {
     return ingredientCount;
 }
 
 std::size_t Concoction::getIngredientCapacity() const {
     return ingredientCapacity;
+}
+
+double Concoction::getTotalVolume() const {
+    double totalVolume = 0;
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        totalVolume += ingredients[index]->getVolumeMl();
+    }
+
+    return totalVolume;
+}
+
+double Concoction::getABV() const {
+    const double totalVolume = getTotalVolume();
+
+    if(totalVolume == 0) {
+        return 0;
+    }
+
+    double alcoholVolume = 0;
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        alcoholVolume += ingredients[index]->getABV() * ingredients[index]->getVolumeMl();
+    }
+
+    return alcoholVolume / totalVolume;
+}
+
+void Concoction::pour(const std::string& ingredientName, int amount) {
+    if(amount <= 0) {
+        std::cout << "Invalid amount. Nothing was poured.\n";
+        return;
+    }
+
+    Ingredient* ingredient = createKnownPouredIngredient(ingredientName, amount);
+
+    if(ingredient == nullptr) {
+        std::cout << "Unknown ingredient: " << ingredientName << "\n";
+        return;
+    }
+
+    if(getTotalVolume() + ingredient->getVolumeMl() > capacityMl) {
+        std::cout << "Cannot pour " << ingredientName << ": glass capacity exceeded.\n";
+        delete ingredient;
+        return;
+    }
+
+    if(ingredientCount == ingredientCapacity) {
+        const std::size_t nextCapacity = ingredientCapacity == 0 ? 4 : ingredientCapacity * 2;
+        reserveIngredients(nextCapacity);
+    }
+
+    ingredients[ingredientCount] = ingredient;
+    ++ingredientCount;
+
+    std::cout << "Poured " << ingredientName << ".\n";
+}
+
+void Concoction::reset() {
+    clearIngredients();
+}
+
+void Concoction::clearIngredients() {
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        delete ingredients[index];
+    }
+
+    delete[] ingredients;
+    ingredients = nullptr;
+    ingredientCount = 0;
+    ingredientCapacity = 0;
+}
+
+void Concoction::reserveIngredients(std::size_t newCapacity) {
+    if(newCapacity <= ingredientCapacity) {
+        return;
+    }
+
+    auto** newIngredients = new Ingredient*[newCapacity] {};
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        newIngredients[index] = ingredients[index];
+    }
+
+    delete[] ingredients;
+    ingredients = newIngredients;
+    ingredientCapacity = newCapacity;
 }

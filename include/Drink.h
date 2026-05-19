@@ -51,15 +51,23 @@ private:
     std::size_t ingredientCount;
     std::size_t ingredientCapacity;
 
+    void clearIngredients();
+    void reserveIngredients(std::size_t newCapacity);
+
 public:
     Concoction();
     Concoction(std::string name, double capacityMl);
+    Concoction(const Concoction& other) = delete;
+    Concoction& operator=(const Concoction& other) = delete;
+    ~Concoction() override;
 
     [[nodiscard]] std::size_t getIngredientCount() const;
     [[nodiscard]] std::size_t getIngredientCapacity() const;
+    [[nodiscard]] double getTotalVolume() const;
+    [[nodiscard]] double getABV() const;
 
-    // TODO: implement Rule of Three/Five here.
-    // TODO: add pour(), serve-related helpers, and operator+= later.
+    void pour(const std::string& ingredientName, int amount);
+    void reset();
 };
 
 bool operator==(const Concoction& concoction, const Recipe& recipe);
