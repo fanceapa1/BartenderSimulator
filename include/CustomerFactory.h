@@ -9,6 +9,7 @@
 class CustomerFactory {
 public:
     static std::unique_ptr<Customer> createCustomer(const std::string& name, int typeSeed = 0);
+    static Recipe createRandomDrinkRequest();
 };
 
 #endif

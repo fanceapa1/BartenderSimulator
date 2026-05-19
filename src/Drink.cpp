@@ -43,6 +43,10 @@ double convertRecipeAmountToMl(const std::string& ingredientName, double amount)
         return amount * 10;
     }
 
+    if(normalizedIngredientName == "grapefruit") {
+        return amount * 15;
+    }
+
     return amount;
 }
 
@@ -55,6 +59,24 @@ double getKnownIngredientABV(const std::string& ingredientName) {
 
     if(normalizedIngredientName == "vermouth") {
         return 0.15;
+    }
+
+    return 0;
+}
+
+double getKnownIngredientSweetness(const std::string& ingredientName) {
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    if(normalizedIngredientName == "tonic") {
+        return 0.20;
+    }
+
+    if(normalizedIngredientName == "soda") {
+        return 0.05;
+    }
+
+    if(normalizedIngredientName == "orange juice") {
+        return 0.80;
     }
 
     return 0;
@@ -75,6 +97,10 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
         return new Mixer("Tonic", amount, 0, 0.20);
     }
 
+    if(normalizedIngredientName == "soda") {
+        return new Mixer("Soda", amount, 0, 0.05);
+    }
+
     if(normalizedIngredientName == "orange juice") {
         return new Mixer("Orange Juice", amount, 0, 0.80);
     }
@@ -85,6 +111,10 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
 
     if(normalizedIngredientName == "lemon") {
         return new Garnish("Lemon", amount * 10, 0);
+    }
+
+    if(normalizedIngredientName == "grapefruit") {
+        return new Garnish("Grapefruit", amount * 15, 0);
     }
 
     return nullptr;
@@ -142,6 +172,18 @@ double Recipe::getABV() const {
     }
 
     return totalABV;
+}
+
+double Recipe::getSweetness() const {
+    double totalSweetness = 0;
+
+    for(const auto& ingredientRatio : ingredientRatios) {
+        const std::string& ingredientName = ingredientRatio.first;
+        const double ratio = ingredientRatio.second;
+        totalSweetness += getKnownIngredientSweetness(ingredientName) * ratio;
+    }
+
+    return totalSweetness;
 }
 
 std::ostream& operator<<(std::ostream& out, const Recipe& recipe) {
@@ -261,6 +303,34 @@ double Concoction::getABV() const {
     }
 
     return alcoholVolume / totalVolume;
+}
+
+double Concoction::getSweetness() const {
+    const double totalVolume = getTotalVolume();
+
+    if(totalVolume == 0) {
+        return 0;
+    }
+
+    double sweetness = 0;
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        sweetness += getKnownIngredientSweetness(ingredients[index]->getName()) * ingredients[index]->getVolumeMl();
+    }
+
+    return sweetness / totalVolume;
+}
+
+bool Concoction::containsIngredient(const std::string& ingredientName) const {
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        if(normalizedName(ingredients[index]->getName()) == normalizedIngredientName) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Concoction::pour(const std::string& ingredientName, int amount) {

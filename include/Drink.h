@@ -43,6 +43,7 @@ public:
     friend std::istream& operator>>(std::istream& in, Recipe& recipe);
 
     [[nodiscard]] double getABV() const;
+    [[nodiscard]] double getSweetness() const;
 };
 
 class Concoction : public Drink {
@@ -65,6 +66,8 @@ public:
     [[nodiscard]] std::size_t getIngredientCapacity() const;
     [[nodiscard]] double getTotalVolume() const;
     [[nodiscard]] double getABV() const;
+    [[nodiscard]] double getSweetness() const;
+    [[nodiscard]] bool containsIngredient(const std::string& ingredientName) const;
 
     void pour(const std::string& ingredientName, int amount);
     void printIngredients(std::ostream& out) const;
