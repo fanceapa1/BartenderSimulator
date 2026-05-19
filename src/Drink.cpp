@@ -1,5 +1,6 @@
 #include "Drink.h"
 
+#include <cctype>
 #include <istream>
 #include <iostream>
 #include <ostream>
@@ -21,12 +22,24 @@ std::string trim(const std::string& text) {
     return text.substr(first, last - first + 1);
 }
 
+std::string normalizedName(const std::string& text) {
+    std::string normalized = trim(text);
+
+    for(char& character : normalized) {
+        character = static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
+    }
+
+    return normalized;
+}
+
 double convertRecipeAmountToMl(const std::string& ingredientName, double amount) {
-    if(ingredientName == "Ice") {
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    if(normalizedIngredientName == "ice") {
         return amount * 25;
     }
 
-    if(ingredientName == "Lemon") {
+    if(normalizedIngredientName == "lemon") {
         return amount * 10;
     }
 
@@ -34,11 +47,13 @@ double convertRecipeAmountToMl(const std::string& ingredientName, double amount)
 }
 
 double getKnownIngredientABV(const std::string& ingredientName) {
-    if(ingredientName == "Gin") {
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    if(normalizedIngredientName == "gin") {
         return 0.40;
     }
 
-    if(ingredientName == "Vermouth") {
+    if(normalizedIngredientName == "vermouth") {
         return 0.15;
     }
 
@@ -46,28 +61,30 @@ double getKnownIngredientABV(const std::string& ingredientName) {
 }
 
 Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int amount) {
-    if(ingredientName == "Gin") {
-        return new Alcohol(ingredientName, amount, 0, 0.40);
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    if(normalizedIngredientName == "gin") {
+        return new Alcohol("Gin", amount, 0, 0.40);
     }
 
-    if(ingredientName == "Vermouth") {
-        return new Alcohol(ingredientName, amount, 0, 0.15);
+    if(normalizedIngredientName == "vermouth") {
+        return new Alcohol("Vermouth", amount, 0, 0.15);
     }
 
-    if(ingredientName == "Tonic") {
-        return new Mixer(ingredientName, amount, 0, 0.20);
+    if(normalizedIngredientName == "tonic") {
+        return new Mixer("Tonic", amount, 0, 0.20);
     }
 
-    if(ingredientName == "Orange Juice") {
-        return new Mixer(ingredientName, amount, 0, 0.80);
+    if(normalizedIngredientName == "orange juice") {
+        return new Mixer("Orange Juice", amount, 0, 0.80);
     }
 
-    if(ingredientName == "Ice") {
-        return new Garnish(ingredientName, amount * 25, 0);
+    if(normalizedIngredientName == "ice") {
+        return new Garnish("Ice", amount * 25, 0);
     }
 
-    if(ingredientName == "Lemon") {
-        return new Garnish(ingredientName, amount * 10, 0);
+    if(normalizedIngredientName == "lemon") {
+        return new Garnish("Lemon", amount * 10, 0);
     }
 
     return nullptr;
@@ -201,7 +218,7 @@ std::istream& operator>>(std::istream& in, Recipe& recipe) {
 }
 
 Concoction::Concoction()
-    : Drink("Player concoction", 250), ingredients(nullptr), ingredientCount(0), ingredientCapacity(0) {
+    : Drink("Player concoction", 500), ingredients(nullptr), ingredientCount(0), ingredientCapacity(0) {
 }
 
 Concoction::Concoction(std::string name, double capacityMl)
@@ -273,7 +290,25 @@ void Concoction::pour(const std::string& ingredientName, int amount) {
     ingredients[ingredientCount] = ingredient;
     ++ingredientCount;
 
-    std::cout << "Poured " << ingredientName << ".\n";
+    std::cout << "Poured " << ingredient->getName() << ".\n";
+}
+
+void Concoction::printIngredients(std::ostream& out) const {
+    if(ingredientCount == 0) {
+        return;
+    }
+
+    out << "Glass: ";
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        if(index != 0) {
+            out << ", ";
+        }
+
+        out << ingredients[index]->getName() << " " << ingredients[index]->getVolumeMl() << "ml";
+    }
+
+    out << "\n";
 }
 
 void Concoction::reset() {

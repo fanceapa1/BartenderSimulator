@@ -67,6 +67,7 @@ public:
     [[nodiscard]] double getABV() const;
 
     void pour(const std::string& ingredientName, int amount);
+    void printIngredients(std::ostream& out) const;
     void reset();
 };
 
