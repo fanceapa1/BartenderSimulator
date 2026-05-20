@@ -43,7 +43,15 @@ double convertRecipeAmountToMl(const std::string& ingredientName, double amount)
         return amount * 10;
     }
 
+    if(normalizedIngredientName == "lime") {
+        return amount * 10;
+    }
+
     if(normalizedIngredientName == "grapefruit") {
+        return amount * 15;
+    }
+
+    if(normalizedIngredientName == "orange") {
         return amount * 15;
     }
 
@@ -53,12 +61,24 @@ double convertRecipeAmountToMl(const std::string& ingredientName, double amount)
 double getKnownIngredientABV(const std::string& ingredientName) {
     const std::string normalizedIngredientName = normalizedName(ingredientName);
 
-    if(normalizedIngredientName == "gin") {
+    if(normalizedIngredientName == "gin" ||
+       normalizedIngredientName == "vodka" ||
+       normalizedIngredientName == "whiskey" ||
+       normalizedIngredientName == "rum" ||
+       normalizedIngredientName == "tequila") {
         return 0.40;
     }
 
     if(normalizedIngredientName == "vermouth") {
         return 0.15;
+    }
+
+    if(normalizedIngredientName == "aperol") {
+        return 0.11;
+    }
+
+    if(normalizedIngredientName == "sparkling wine") {
+        return 0.12;
     }
 
     return 0;
@@ -79,6 +99,18 @@ double getKnownIngredientSweetness(const std::string& ingredientName) {
         return 0.80;
     }
 
+    if(normalizedIngredientName == "cola") {
+        return 0.70;
+    }
+
+    if(normalizedIngredientName == "ginger beer") {
+        return 0.60;
+    }
+
+    if(normalizedIngredientName == "simple syrup" || normalizedIngredientName == "grenadine") {
+        return 1.00;
+    }
+
     return 0;
 }
 
@@ -93,6 +125,30 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
         return new Alcohol("Vermouth", amount, 0, 0.15);
     }
 
+    if(normalizedIngredientName == "vodka") {
+        return new Alcohol("Vodka", amount, 0, 0.40);
+    }
+
+    if(normalizedIngredientName == "whiskey") {
+        return new Alcohol("Whiskey", amount, 0, 0.40);
+    }
+
+    if(normalizedIngredientName == "rum") {
+        return new Alcohol("Rum", amount, 0, 0.40);
+    }
+
+    if(normalizedIngredientName == "tequila") {
+        return new Alcohol("Tequila", amount, 0, 0.40);
+    }
+
+    if(normalizedIngredientName == "aperol") {
+        return new Alcohol("Aperol", amount, 0, 0.11);
+    }
+
+    if(normalizedIngredientName == "sparkling wine") {
+        return new Alcohol("Sparkling Wine", amount, 0, 0.12);
+    }
+
     if(normalizedIngredientName == "tonic") {
         return new Mixer("Tonic", amount, 0, 0.20);
     }
@@ -105,6 +161,22 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
         return new Mixer("Orange Juice", amount, 0, 0.80);
     }
 
+    if(normalizedIngredientName == "cola") {
+        return new Mixer("Cola", amount, 0, 0.70);
+    }
+
+    if(normalizedIngredientName == "ginger beer") {
+        return new Mixer("Ginger Beer", amount, 0, 0.60);
+    }
+
+    if(normalizedIngredientName == "simple syrup") {
+        return new Mixer("Simple Syrup", amount, 0, 1.00);
+    }
+
+    if(normalizedIngredientName == "grenadine") {
+        return new Mixer("Grenadine", amount, 0, 1.00);
+    }
+
     if(normalizedIngredientName == "ice") {
         return new Garnish("Ice", amount * 25, 0);
     }
@@ -113,8 +185,16 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
         return new Garnish("Lemon", amount * 10, 0);
     }
 
+    if(normalizedIngredientName == "lime") {
+        return new Garnish("Lime", amount * 10, 0);
+    }
+
     if(normalizedIngredientName == "grapefruit") {
         return new Garnish("Grapefruit", amount * 15, 0);
+    }
+
+    if(normalizedIngredientName == "orange") {
+        return new Garnish("Orange", amount * 15, 0);
     }
 
     return nullptr;

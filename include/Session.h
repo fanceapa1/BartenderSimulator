@@ -15,7 +15,7 @@ private:
     double dailyProfit;
     std::map<std::string, std::unique_ptr<Customer>> customers;
     std::vector<Recipe> servedRecipes;
-    int servedDrinkCount;
+    int completedCustomerCount;
     Customer* currentCustomer;
     Concoction currentDrink;
 
@@ -27,6 +27,8 @@ private:
     void handlePour();
     void handleServe();
     void handleDiscard();
+    void handleRefuse();
+    void handleMenu() const;
     void advanceTime();
 
     [[nodiscard]] bool isShiftComplete() const;

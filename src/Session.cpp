@@ -1,6 +1,7 @@
 #include "Session.h"
 
 #include "CustomerFactory.h"
+#include "MenuRegistry.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -15,7 +16,7 @@
 namespace {
 constexpr int ShiftLengthMinutes = 8 * 60;
 constexpr int MinutesPerCustomer = 15;
-constexpr int MaxServedDrinks = ShiftLengthMinutes / MinutesPerCustomer;
+constexpr int MaxCustomerSlots = ShiftLengthMinutes / MinutesPerCustomer;
 constexpr int StartHour = 20;
 constexpr int MinutesPerDay = 24 * 60;
 
@@ -41,7 +42,7 @@ double Session::totalBarEarnings = 0;
 Session::Session()
     : currentMinuteOfShift(0),
       dailyProfit(0),
-      servedDrinkCount(0),
+      completedCustomerCount(0),
       currentCustomer(nullptr),
       currentDrink() {
     createCustomerPool();
@@ -51,13 +52,17 @@ Session::Session()
 void Session::run() {
     std::string command;
 
-    while(!isShiftComplete() && std::cout << "Select action (pour/serve/discard):\n" && std::getline(std::cin, command)) {
+    while(!isShiftComplete() && std::cout << "Select action (pour/serve/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
         if(command == "pour") {
             handlePour();
         } else if(command == "serve") {
             handleServe();
         } else if(command == "discard" || command == "dispose") {
             handleDiscard();
+        } else if(command == "refuse") {
+            handleRefuse();
+        } else if(command == "menu") {
+            handleMenu();
         } else if(command == "exit") {
             break;
         } else if(command.empty()) {
@@ -95,7 +100,7 @@ void Session::displayLeaderboard() {
 
 void Session::createCustomerPool() {
     std::vector<std::string> possibleNames = makePossibleNames();
-    std::shuffle(possibleNames.begin(), possibleNames.end(), randomGenerator());
+    std::ranges::shuffle(possibleNames, randomGenerator());
 
     std::uniform_int_distribution<int> poolSizeDistribution(10, 20);
     std::uniform_int_distribution<int> customerTypeDistribution(0, 2);
@@ -196,11 +201,30 @@ void Session::handleDiscard() {
     currentDrink.reset();
 }
 
+void Session::handleRefuse() {
+    if(currentCustomer == nullptr) {
+        std::cout << "No customer is currently waiting.\n";
+        return;
+    }
+
+    std::cout << "Service refused.\n\n";
+    currentDrink.reset();
+    advanceTime();
+
+    if(!isShiftComplete()) {
+        pickNextCustomer();
+    }
+}
+
+void Session::handleMenu() const {
+    MenuRegistry::getInstance().printMenu(std::cout);
+}
+
 void Session::advanceTime() {
-    ++servedDrinkCount;
-    currentMinuteOfShift = servedDrinkCount * MinutesPerCustomer;
+    ++completedCustomerCount;
+    currentMinuteOfShift = completedCustomerCount * MinutesPerCustomer;
 }
 
 bool Session::isShiftComplete() const {
-    return servedDrinkCount >= MaxServedDrinks;
+    return completedCustomerCount >= MaxCustomerSlots;
 }
