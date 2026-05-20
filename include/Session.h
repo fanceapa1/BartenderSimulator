@@ -15,11 +15,30 @@ private:
     double dailyProfit;
     std::map<std::string, std::unique_ptr<Customer>> customers;
     std::vector<Recipe> servedRecipes;
+    int servedDrinkCount;
+    Customer* currentCustomer;
+    Concoction currentDrink;
 
     static double totalBarEarnings;
 
+    void createCustomerPool();
+    void pickNextCustomer();
+    void printCurrentCustomer() const;
+    void handlePour();
+    void handleServe();
+    void handleDiscard();
+    void advanceTime();
+
+    [[nodiscard]] bool isShiftComplete() const;
+
 public:
-    // TODO: add shift/time, payment, serve(), and refuseService() behavior.
+    Session();
+
+    void run();
+
+    [[nodiscard]] double getDailyProfit() const;
+    [[nodiscard]] std::string getCurrentClockTime() const;
+
     static void displayLeaderboard();
 };
 
