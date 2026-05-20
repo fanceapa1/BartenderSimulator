@@ -50,7 +50,7 @@ double calculateCriticClosenessScore(const double expected, const double actual)
 
 Customer::Customer(std::string name, double drunkThresholdMl, double drunkEventStartingBadChance)
     : name(std::move(name)),
-      satisfaction(10),
+      satisfaction(0),
       alcoholDrank(0),
       drunkThresholdMl(drunkThresholdMl),
       drunkEventStartingBadChance(drunkEventStartingBadChance),
@@ -105,9 +105,13 @@ void Customer::chooseRandomDrinkRequest() {
 
 double Customer::receiveDrink(const Concoction& drink) {
     const double currentOrderSatisfaction = std::max(0.0, calculateCurrentOrderSatisfaction(drink));
-    const double previousSatisfaction = hasPreviousOrder ? satisfaction : 10.0;
 
-    satisfaction = (previousSatisfaction + currentOrderSatisfaction) / 2.0;
+    if(hasPreviousOrder) {
+        satisfaction = (satisfaction + currentOrderSatisfaction) / 2.0;
+    } else {
+        satisfaction = currentOrderSatisfaction;
+    }
+
     alcoholDrank += drink.getABV() * drink.getTotalVolume();
     hasPreviousOrder = true;
 
