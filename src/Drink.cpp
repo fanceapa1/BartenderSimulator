@@ -145,83 +145,83 @@ Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int a
     const std::string normalizedIngredientName = normalizedName(ingredientName);
 
     if(normalizedIngredientName == "gin") {
-        return new Alcohol("Gin", amount, 0, 0.40);
+        return new Alcohol("Gin", amount, 0.40);
     }
 
     if(normalizedIngredientName == "vermouth") {
-        return new Alcohol("Vermouth", amount, 0, 0.15);
+        return new Alcohol("Vermouth", amount, 0.15);
     }
 
     if(normalizedIngredientName == "vodka") {
-        return new Alcohol("Vodka", amount, 0, 0.40);
+        return new Alcohol("Vodka", amount, 0.40);
     }
 
     if(normalizedIngredientName == "whiskey") {
-        return new Alcohol("Whiskey", amount, 0, 0.40);
+        return new Alcohol("Whiskey", amount, 0.40);
     }
 
     if(normalizedIngredientName == "rum") {
-        return new Alcohol("Rum", amount, 0, 0.40);
+        return new Alcohol("Rum", amount, 0.40);
     }
 
     if(normalizedIngredientName == "tequila") {
-        return new Alcohol("Tequila", amount, 0, 0.40);
+        return new Alcohol("Tequila", amount, 0.40);
     }
 
     if(normalizedIngredientName == "aperol") {
-        return new Alcohol("Aperol", amount, 0, 0.11);
+        return new Alcohol("Aperol", amount, 0.11);
     }
 
     if(normalizedIngredientName == "sparkling wine") {
-        return new Alcohol("Sparkling Wine", amount, 0, 0.12);
+        return new Alcohol("Sparkling Wine", amount, 0.12);
     }
 
     if(normalizedIngredientName == "tonic") {
-        return new Mixer("Tonic", amount, 0, 0.20);
+        return new Mixer("Tonic", amount, 0.20);
     }
 
     if(normalizedIngredientName == "soda") {
-        return new Mixer("Soda", amount, 0, 0.05);
+        return new Mixer("Soda", amount, 0.05);
     }
 
     if(normalizedIngredientName == "orange juice") {
-        return new Mixer("Orange Juice", amount, 0, 0.80);
+        return new Mixer("Orange Juice", amount, 0.80);
     }
 
     if(normalizedIngredientName == "cola") {
-        return new Mixer("Cola", amount, 0, 0.70);
+        return new Mixer("Cola", amount, 0.70);
     }
 
     if(normalizedIngredientName == "ginger beer") {
-        return new Mixer("Ginger Beer", amount, 0, 0.60);
+        return new Mixer("Ginger Beer", amount, 0.60);
     }
 
     if(normalizedIngredientName == "simple syrup") {
-        return new Mixer("Simple Syrup", amount, 0, 1.00);
+        return new Mixer("Simple Syrup", amount, 1.00);
     }
 
     if(normalizedIngredientName == "grenadine") {
-        return new Mixer("Grenadine", amount, 0, 1.00);
+        return new Mixer("Grenadine", amount, 1.00);
     }
 
     if(normalizedIngredientName == "ice") {
-        return new Garnish("Ice", amount * 25, 0);
+        return new Garnish("Ice", amount * 25);
     }
 
     if(normalizedIngredientName == "lemon") {
-        return new Garnish("Lemon", amount * 10, 0);
+        return new Garnish("Lemon", amount * 10);
     }
 
     if(normalizedIngredientName == "lime") {
-        return new Garnish("Lime", amount * 10, 0);
+        return new Garnish("Lime", amount * 10);
     }
 
     if(normalizedIngredientName == "grapefruit") {
-        return new Garnish("Grapefruit", amount * 15, 0);
+        return new Garnish("Grapefruit", amount * 15);
     }
 
     if(normalizedIngredientName == "orange") {
-        return new Garnish("Orange", amount * 15, 0);
+        return new Garnish("Orange", amount * 15);
     }
 
     return nullptr;
@@ -422,7 +422,11 @@ double Concoction::getSweetness() const {
     double sweetness = 0;
 
     for(std::size_t index = 0; index < ingredientCount; ++index) {
-        sweetness += getKnownIngredientSweetness(ingredients[index]->getName()) * ingredients[index]->getVolumeMl();
+        const auto* mixer = dynamic_cast<const Mixer*>(ingredients[index]);
+
+        if(mixer != nullptr) {
+            sweetness += mixer->getSweetness() * mixer->getVolumeMl();
+        }
     }
 
     return sweetness / totalVolume;
@@ -456,17 +460,17 @@ void Concoction::pour(const std::string& ingredientName, int amount) {
         throw InvalidIngredientException();
     }
 
-    if(getTotalVolume() + ingredient->getVolumeMl() > capacityMl) {
+    if(getTotalVolume() + ingredient->getVolumeMl() > getCapacityMl()) {
         delete ingredient;
         throw GlassOverflowException();
     }
 
-    if(ingredientCount == ingredientCapacity) {
-        const std::size_t nextCapacity = ingredientCapacity == 0 ? 4 : ingredientCapacity * 2;
+    if(getIngredientCount() == getIngredientCapacity()) {
+        const std::size_t nextCapacity = getIngredientCapacity() == 0 ? 4 : getIngredientCapacity() * 2;
         reserveIngredients(nextCapacity);
     }
 
-    ingredients[ingredientCount] = ingredient;
+    ingredients[getIngredientCount()] = ingredient;
     ++ingredientCount;
 
     std::cout << "Poured " << ingredient->getName() << ".\n";

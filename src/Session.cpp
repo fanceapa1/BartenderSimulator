@@ -204,7 +204,8 @@ void Session::handleServe() {
     const bool wasAlreadyDrunk = currentCustomer->isDrunk();
     const Recipe requestedDrink = currentCustomer->getDrinkRequest();
     const double basePrice = requestedDrink.getMenuPrice();
-    const double satisfaction = currentCustomer->receiveDrink(currentDrink);
+    currentCustomer->receiveDrink(currentDrink);
+    const double satisfaction = currentCustomer->getSatisfaction();
 
     servedRecipes.push_back(requestedDrink);
 
@@ -284,7 +285,7 @@ void Session::finalizeSession() {
 
     leaderboardFinalized = true;
 
-    std::cout << "Final shift earnings: " << dailyProfit << "$\n";
+    std::cout << "Final shift earnings: " << getDailyProfit() << "$\n";
     std::cout << "Enter leaderboard name:\n";
 
     std::string playerName;
@@ -295,10 +296,10 @@ void Session::finalizeSession() {
 
     Leaderboard<double> leaderboard;
     leaderboard.loadFromFile(LeaderboardFilename);
-    leaderboard.addEntry(playerName, dailyProfit);
+    leaderboard.addEntry(playerName, getDailyProfit());
     leaderboard.sortByScoreDescending();
     leaderboard.saveToFile(LeaderboardFilename);
-    leaderboard.print(std::cout);
+    displayLeaderboard();
 }
 
 void Session::advanceTime() {

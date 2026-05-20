@@ -36,7 +36,6 @@ public:
     static MenuRegistry& getInstance();
 
     [[nodiscard]] const std::vector<Recipe>& getRecipes() const;
-    [[nodiscard]] const Recipe* findRecipe(const std::string& name) const;
     [[nodiscard]] Recipe getRandomRecipe() const;
 
     void printMenu(std::ostream& out) const;

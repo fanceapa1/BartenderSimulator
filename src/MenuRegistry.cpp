@@ -144,34 +144,24 @@ const std::vector<Recipe>& MenuRegistry::getRecipes() const {
     return recipes;
 }
 
-const Recipe* MenuRegistry::findRecipe(const std::string& name) const {
-    const auto foundRecipe = std::ranges::find_if(recipes, [&name](const Recipe& recipe) {
-        return recipe.getName() == name;
-    });
-
-    if(foundRecipe == recipes.end()) {
-        return nullptr;
-    }
-
-    return &(*foundRecipe);
-}
-
 Recipe MenuRegistry::getRandomRecipe() const {
-    if(recipes.empty()) {
+    const std::vector<Recipe>& availableRecipes = getRecipes();
+
+    if(availableRecipes.empty()) {
         return {};
     }
 
     static std::random_device randomDevice;
     static std::mt19937 generator(randomDevice());
 
-    std::uniform_int_distribution<std::size_t> recipeDistribution(0, recipes.size() - 1);
-    return recipes[recipeDistribution(generator)];
+    std::uniform_int_distribution<std::size_t> recipeDistribution(0, availableRecipes.size() - 1);
+    return availableRecipes[recipeDistribution(generator)];
 }
 
 void MenuRegistry::printMenu(std::ostream& out) const {
     out << "Menu:\n";
 
-    for(const Recipe& recipe : recipes) {
+    for(const Recipe& recipe : getRecipes()) {
         out << recipe.getName() << " - $" << recipe.getMenuPrice() << ": ";
 
         const auto foundDisplayIngredients = displayIngredientsByRecipe.find(recipe.getName());

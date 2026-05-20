@@ -7,15 +7,13 @@ class Ingredient {
 protected:
     std::string name;
     int volumeMl;
-    double basePrice;
 
 public:
-    Ingredient(std::string name, int volumeMl, double basePrice);
+    Ingredient(std::string name, int volumeMl);
     virtual ~Ingredient() = default;
 
-    [[nodiscard]] std::string getName() const;
+    [[nodiscard]] const std::string& getName() const;
     [[nodiscard]] int getVolumeMl() const;
-    [[nodiscard]] double getBasePrice() const;
     [[nodiscard]] virtual double getABV() const = 0;
 };
 
@@ -24,7 +22,7 @@ private:
     double abv;
 
 public:
-    Alcohol(std::string name, int volumeMl, double basePrice, double abv);
+    Alcohol(std::string name, int volumeMl, double abv);
     [[nodiscard]] double getABV() const override;
 };
 
@@ -33,7 +31,7 @@ private:
     double sweetness;
 
 public:
-    Mixer(std::string name, int volumeMl, double basePrice, double sweetness);
+    Mixer(std::string name, int volumeMl, double sweetness);
 
     [[nodiscard]] double getSweetness() const;
     [[nodiscard]] double getABV() const override;
@@ -41,7 +39,7 @@ public:
 
 class Garnish : public Ingredient {
 public:
-    Garnish(std::string name, int volumeMl, double basePrice);
+    Garnish(std::string name, int volumeMl);
 
     [[nodiscard]] double getABV() const override;
 };

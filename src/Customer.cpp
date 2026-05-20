@@ -75,7 +75,7 @@ double Customer::getDrunkThresholdMl() const {
 }
 
 bool Customer::isDrunk() const {
-    return alcoholDrank >= drunkThresholdMl;
+    return getAlcoholDrank() >= getDrunkThresholdMl();
 }
 
 double Customer::getDrunkEventBadChance() const {
@@ -83,11 +83,15 @@ double Customer::getDrunkEventBadChance() const {
         return 0;
     }
 
-    if(alcoholDrank >= MaxDrunkEventAlcoholMl) {
+    const double currentAlcoholDrank = getAlcoholDrank();
+    const double currentDrunkThreshold = getDrunkThresholdMl();
+
+    if(currentAlcoholDrank >= MaxDrunkEventAlcoholMl) {
         return 1;
     }
 
-    const double progress = (alcoholDrank - drunkThresholdMl) / (MaxDrunkEventAlcoholMl - drunkThresholdMl);
+    const double progress = (currentAlcoholDrank - currentDrunkThreshold) /
+                            (MaxDrunkEventAlcoholMl - currentDrunkThreshold);
     return drunkEventStartingBadChance + progress * (1.0 - drunkEventStartingBadChance);
 }
 
@@ -100,7 +104,7 @@ void Customer::setDrinkRequest(const Recipe& newDrinkRequest) {
 }
 
 void Customer::chooseRandomDrinkRequest() {
-    drinkRequest = MenuRegistry::getInstance().getRandomRecipe();
+    setDrinkRequest(MenuRegistry::getInstance().getRandomRecipe());
 }
 
 double Customer::receiveDrink(const Concoction& drink) {
@@ -126,11 +130,6 @@ double CasualPatron::calculateCurrentOrderSatisfaction(const Concoction& drink) 
     return 10.0 * calculateCasualWeightedScore(drinkRequest, drink);
 }
 
-double CasualPatron::calculateTip(double drinkAccuracy) const {
-    static_cast<void>(drinkAccuracy);
-    return 0;
-}
-
 std::string CasualPatron::getType() const {
     return "Casual Patron";
 }
@@ -147,11 +146,6 @@ double HeavyDrinker::calculateCurrentOrderSatisfaction(const Concoction& drink) 
     return 10.0 * (0.70 * abvScore + 0.30 * ingredientScore + 0.25 * sweetnessScore);
 }
 
-double HeavyDrinker::calculateTip(double drinkAccuracy) const {
-    static_cast<void>(drinkAccuracy);
-    return 0;
-}
-
 std::string HeavyDrinker::getType() const {
     return "Heavy Drinker";
 }
@@ -166,11 +160,6 @@ double Critic::calculateCurrentOrderSatisfaction(const Concoction& drink) const 
     const double sweetnessScore = calculateCriticClosenessScore(drinkRequest.getSweetness(), drink.getSweetness());
 
     return 10.0 * (0.50 * ingredientScore + 0.25 * abvScore + 0.25 * sweetnessScore);
-}
-
-double Critic::calculateTip(double drinkAccuracy) const {
-    static_cast<void>(drinkAccuracy);
-    return 0;
 }
 
 std::string Critic::getType() const {
