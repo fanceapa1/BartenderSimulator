@@ -29,6 +29,19 @@ double calculateIngredientMatchScore(const Recipe& recipe, const Concoction& dri
 
     return static_cast<double>(matchingIngredients) / static_cast<double>(recipeIngredients.size());
 }
+
+double calculateCasualWeightedScore(const Recipe& recipe, const Concoction& drink) {
+    const double ingredientScore = calculateIngredientMatchScore(recipe, drink);
+    const double abvScore = closenessScore(recipe.getABV(), drink.getABV());
+    const double sweetnessScore = closenessScore(recipe.getSweetness(), drink.getSweetness());
+
+    return 0.50 * ingredientScore + 0.25 * abvScore + 0.25 * sweetnessScore;
+}
+
+double calculateCriticClosenessScore(const double expected, const double actual) {
+    const double normalCloseness = closenessScore(expected, actual);
+    return 1.5 * normalCloseness * normalCloseness;
+}
 }
 
 Customer::Customer(std::string name, double intoxicationLimitMl, Recipe drinkRequest)
@@ -57,12 +70,7 @@ void Customer::setDrinkRequest(const Recipe& newDrinkRequest) {
 }
 
 double Customer::receiveDrink(const Concoction& drink) {
-    const double ingredientScore = calculateIngredientMatchScore(drinkRequest, drink);
-    const double abvScore = closenessScore(drinkRequest.getABV(), drink.getABV());
-    const double sweetnessScore = closenessScore(drinkRequest.getSweetness(), drink.getSweetness());
-
-    const double weightedScore = 0.50 * ingredientScore + 0.25 * abvScore + 0.25 * sweetnessScore;
-    const double currentOrderSatisfaction = std::clamp(10.0 * weightedScore, 0.0, 10.0);
+    const double currentOrderSatisfaction = std::max(0.0, calculateCurrentOrderSatisfaction(drink));
     const double previousSatisfaction = hasPreviousOrder ? satisfaction : 10.0;
 
     satisfaction = (previousSatisfaction + currentOrderSatisfaction) / 2.0;
@@ -76,7 +84,57 @@ CasualPatron::CasualPatron(std::string name, Recipe drinkRequest)
     : Customer(std::move(name), 80, std::move(drinkRequest)) {
 }
 
+double CasualPatron::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
+    return 10.0 * calculateCasualWeightedScore(drinkRequest, drink);
+}
+
 double CasualPatron::calculateTip(double drinkAccuracy) const {
     static_cast<void>(drinkAccuracy);
     return 0;
+}
+
+std::string CasualPatron::getType() const {
+    return "Casual Patron";
+}
+
+HeavyDrinker::HeavyDrinker(std::string name, Recipe drinkRequest)
+    : Customer(std::move(name), 140, std::move(drinkRequest)) {
+}
+
+double HeavyDrinker::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
+    const double ingredientScore = calculateIngredientMatchScore(drinkRequest, drink);
+    const double abvScore = closenessScore(drinkRequest.getABV(), drink.getABV());
+    const double sweetnessScore = closenessScore(drinkRequest.getSweetness(), drink.getSweetness());
+
+    return 10.0 * (0.70 * abvScore + 0.30 * ingredientScore + 0.25 * sweetnessScore);
+}
+
+double HeavyDrinker::calculateTip(double drinkAccuracy) const {
+    static_cast<void>(drinkAccuracy);
+    return 0;
+}
+
+std::string HeavyDrinker::getType() const {
+    return "Heavy Drinker";
+}
+
+Critic::Critic(std::string name, Recipe drinkRequest)
+    : Customer(std::move(name), 60, std::move(drinkRequest)) {
+}
+
+double Critic::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
+    const double ingredientScore = calculateIngredientMatchScore(drinkRequest, drink);
+    const double abvScore = calculateCriticClosenessScore(drinkRequest.getABV(), drink.getABV());
+    const double sweetnessScore = calculateCriticClosenessScore(drinkRequest.getSweetness(), drink.getSweetness());
+
+    return 10.0 * (0.50 * ingredientScore + 0.25 * abvScore + 0.25 * sweetnessScore);
+}
+
+double Critic::calculateTip(double drinkAccuracy) const {
+    static_cast<void>(drinkAccuracy);
+    return 0;
+}
+
+std::string Critic::getType() const {
+    return "Critic";
 }

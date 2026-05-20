@@ -26,8 +26,17 @@ Recipe makeRecipeFromVolumes(const std::string& name,
 }
 }
 
-std::unique_ptr<Customer> CustomerFactory::createCustomer(const std::string& name, int typeSeed) {
-    static_cast<void>(typeSeed);
+std::unique_ptr<Customer> CustomerFactory::createCustomer(const std::string& name, const int typeSeed) {
+    const int customerType = ((typeSeed % 3) + 3) % 3;
+
+    if(customerType == 1) {
+        return std::make_unique<HeavyDrinker>(name, createRandomDrinkRequest());
+    }
+
+    if(customerType == 2) {
+        return std::make_unique<Critic>(name, createRandomDrinkRequest());
+    }
+
     return std::make_unique<CasualPatron>(name, createRandomDrinkRequest());
 }
 
