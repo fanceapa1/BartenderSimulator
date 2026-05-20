@@ -2,6 +2,7 @@
 
 #include "CustomerFactory.h"
 #include "Exceptions.h"
+#include "Leaderboard.h"
 #include "MenuRegistry.h"
 
 #include <algorithm>
@@ -15,11 +16,10 @@
 #include <vector>
 
 namespace {
-constexpr int ShiftLengthMinutes = 8 * 60;
+constexpr int ShiftLengthMinutes = 4 * 60;
 constexpr int MinutesPerCustomer = 15;
 constexpr int MaxCustomerSlots = ShiftLengthMinutes / MinutesPerCustomer;
-constexpr int StartHour = 20;
-constexpr int MinutesPerDay = 24 * 60;
+constexpr const char* LeaderboardFilename = "leaderboard.txt";
 
 std::mt19937& randomGenerator() {
     static std::random_device randomDevice;
@@ -50,7 +50,8 @@ Session::Session()
       dailyProfit(0),
       completedCustomerCount(0),
       currentCustomer(nullptr),
-      currentDrink() {
+      currentDrink(),
+      leaderboardFinalized(false) {
     createCustomerPool();
     pickNextCustomer();
 }
@@ -91,7 +92,7 @@ void Session::run() {
         std::cout << "No customers left in the bar. Shift ended early.\n";
     }
 
-    std::cout << "Final shift earnings: " << dailyProfit << "$\n";
+    finalizeSession();
 }
 
 double Session::getDailyProfit() const {
@@ -99,9 +100,8 @@ double Session::getDailyProfit() const {
 }
 
 std::string Session::getCurrentClockTime() const {
-    const int totalMinutes = (StartHour * 60 + currentMinuteOfShift) % MinutesPerDay;
-    const int hour = totalMinutes / 60;
-    const int minute = totalMinutes % 60;
+    const int hour = currentMinuteOfShift / 60;
+    const int minute = currentMinuteOfShift % 60;
 
     std::ostringstream out;
     out << std::setw(2) << std::setfill('0') << hour << ":"
@@ -110,7 +110,9 @@ std::string Session::getCurrentClockTime() const {
 }
 
 void Session::displayLeaderboard() {
-    std::cout << "Total bar earnings: " << totalBarEarnings << "$\n";
+    Leaderboard<double> leaderboard;
+    leaderboard.loadFromFile(LeaderboardFilename);
+    leaderboard.print(std::cout);
 }
 
 void Session::createCustomerPool() {
@@ -273,6 +275,30 @@ void Session::handleRefuse() {
 
 void Session::handleMenu() {
     MenuRegistry::getInstance().printMenu(std::cout);
+}
+
+void Session::finalizeSession() {
+    if(leaderboardFinalized) {
+        return;
+    }
+
+    leaderboardFinalized = true;
+
+    std::cout << "Final shift earnings: " << dailyProfit << "$\n";
+    std::cout << "Enter leaderboard name:\n";
+
+    std::string playerName;
+
+    if(!std::getline(std::cin, playerName) || playerName.empty()) {
+        playerName = "Anonymous";
+    }
+
+    Leaderboard<double> leaderboard;
+    leaderboard.loadFromFile(LeaderboardFilename);
+    leaderboard.addEntry(playerName, dailyProfit);
+    leaderboard.sortByScoreDescending();
+    leaderboard.saveToFile(LeaderboardFilename);
+    leaderboard.print(std::cout);
 }
 
 void Session::advanceTime() {

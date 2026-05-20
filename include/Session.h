@@ -18,6 +18,7 @@ private:
     int completedCustomerCount;
     Customer* currentCustomer;
     Concoction currentDrink;
+    bool leaderboardFinalized;
 
     static double totalBarEarnings;
 
@@ -30,6 +31,7 @@ private:
     void handleRefuse();
     static void handleMenu();
     void advanceTime();
+    void finalizeSession();
 
     [[nodiscard]] bool isShiftComplete() const;
 
