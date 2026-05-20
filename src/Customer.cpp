@@ -8,6 +8,8 @@
 #include <utility>
 
 namespace {
+constexpr double MaxDrunkEventAlcoholMl = 150.0;
+
 double closenessScore(const double expected, const double actual) {
     const double denominator = std::max(std::abs(expected), 0.01);
     const double difference = std::abs(expected - actual);
@@ -46,11 +48,12 @@ double calculateCriticClosenessScore(const double expected, const double actual)
 }
 }
 
-Customer::Customer(std::string name, double intoxicationLimitMl)
+Customer::Customer(std::string name, double drunkThresholdMl, double drunkEventStartingBadChance)
     : name(std::move(name)),
       satisfaction(10),
-      alcoholConsumedMl(0),
-      intoxicationLimitMl(intoxicationLimitMl),
+      alcoholDrank(0),
+      drunkThresholdMl(drunkThresholdMl),
+      drunkEventStartingBadChance(drunkEventStartingBadChance),
       drinkRequest(MenuRegistry::getInstance().getRandomRecipe()),
       hasPreviousOrder(false) {
 }
@@ -61,6 +64,31 @@ const std::string& Customer::getName() const {
 
 double Customer::getSatisfaction() const {
     return satisfaction;
+}
+
+double Customer::getAlcoholDrank() const {
+    return alcoholDrank;
+}
+
+double Customer::getDrunkThresholdMl() const {
+    return drunkThresholdMl;
+}
+
+bool Customer::isDrunk() const {
+    return alcoholDrank >= drunkThresholdMl;
+}
+
+double Customer::getDrunkEventBadChance() const {
+    if(!isDrunk()) {
+        return 0;
+    }
+
+    if(alcoholDrank >= MaxDrunkEventAlcoholMl) {
+        return 1;
+    }
+
+    const double progress = (alcoholDrank - drunkThresholdMl) / (MaxDrunkEventAlcoholMl - drunkThresholdMl);
+    return drunkEventStartingBadChance + progress * (1.0 - drunkEventStartingBadChance);
 }
 
 const Recipe& Customer::getDrinkRequest() const {
@@ -80,14 +108,14 @@ double Customer::receiveDrink(const Concoction& drink) {
     const double previousSatisfaction = hasPreviousOrder ? satisfaction : 10.0;
 
     satisfaction = (previousSatisfaction + currentOrderSatisfaction) / 2.0;
-    alcoholConsumedMl += drink.getABV() * drink.getTotalVolume();
+    alcoholDrank += drink.getABV() * drink.getTotalVolume();
     hasPreviousOrder = true;
 
     return satisfaction;
 }
 
 CasualPatron::CasualPatron(std::string name)
-    : Customer(std::move(name), 80) {
+    : Customer(std::move(name), 60, 0.50) {
 }
 
 double CasualPatron::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
@@ -104,7 +132,7 @@ std::string CasualPatron::getType() const {
 }
 
 HeavyDrinker::HeavyDrinker(std::string name)
-    : Customer(std::move(name), 140) {
+    : Customer(std::move(name), 100, 0.80) {
 }
 
 double HeavyDrinker::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
@@ -125,7 +153,7 @@ std::string HeavyDrinker::getType() const {
 }
 
 Critic::Critic(std::string name)
-    : Customer(std::move(name), 60) {
+    : Customer(std::move(name), 60, 0.50) {
 }
 
 double Critic::calculateCurrentOrderSatisfaction(const Concoction& drink) const {

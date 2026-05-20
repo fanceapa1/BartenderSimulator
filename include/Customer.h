@@ -9,19 +9,24 @@ class Customer {
 protected:
     std::string name;
     double satisfaction;
-    double alcoholConsumedMl;
-    double intoxicationLimitMl;
+    double alcoholDrank;
+    double drunkThresholdMl;
+    double drunkEventStartingBadChance;
     Recipe drinkRequest;
     bool hasPreviousOrder;
 
     [[nodiscard]] virtual double calculateCurrentOrderSatisfaction(const Concoction& drink) const = 0;
 
 public:
-    Customer(std::string name, double intoxicationLimitMl);
+    Customer(std::string name, double drunkThresholdMl, double drunkEventStartingBadChance);
     virtual ~Customer() = default;
 
     [[nodiscard]] const std::string& getName() const;
     [[nodiscard]] double getSatisfaction() const;
+    [[nodiscard]] double getAlcoholDrank() const;
+    [[nodiscard]] double getDrunkThresholdMl() const;
+    [[nodiscard]] bool isDrunk() const;
+    [[nodiscard]] double getDrunkEventBadChance() const;
     [[nodiscard]] const Recipe& getDrinkRequest() const;
 
     void setDrinkRequest(const Recipe& newDrinkRequest);

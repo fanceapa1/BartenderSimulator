@@ -26,6 +26,11 @@ std::mt19937& randomGenerator() {
     return generator;
 }
 
+bool rollBadDrunkEvent(const Customer& customer) {
+    std::bernoulli_distribution badEventDistribution(customer.getDrunkEventBadChance());
+    return badEventDistribution(randomGenerator());
+}
+
 std::vector<std::string> makePossibleNames() {
     return {
         "Alex", "Maya", "Victor", "Elena", "Andrei", "Sofia", "Matei", "Irina", "David", "Ana",
@@ -52,7 +57,8 @@ Session::Session()
 void Session::run() {
     std::string command;
 
-    while(!isShiftComplete() && std::cout << "Select action (pour/serve/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
+    while(!isShiftComplete() && !customers.empty() &&
+          std::cout << "Select action (pour/serve/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
         if(command == "pour") {
             handlePour();
         } else if(command == "serve") {
@@ -74,6 +80,10 @@ void Session::run() {
 
     if(isShiftComplete()) {
         std::cout << "Shift complete. Final time: " << getCurrentClockTime() << "\n";
+    }
+
+    if(customers.empty() && !isShiftComplete()) {
+        std::cout << "No customers left in the bar. Shift ended early.\n";
     }
 
     std::cout << "Final shift earnings: " << dailyProfit << "$\n";
@@ -133,7 +143,13 @@ void Session::printCurrentCustomer() const {
     }
 
     std::cout << "Current time: " << getCurrentClockTime() << "\n";
-    std::cout << currentCustomer->getName() << " - " << currentCustomer->getType() << "\n";
+    std::cout << currentCustomer->getName() << " - " << currentCustomer->getType();
+
+    if(currentCustomer->isDrunk()) {
+        std::cout << " - DRUNK";
+    }
+
+    std::cout << "\n";
     std::cout << "Hello! I would like a " << currentCustomer->getDrinkRequest().getName() << "!\n";
 }
 
@@ -173,25 +189,55 @@ void Session::handleServe() {
         return;
     }
 
-    const Recipe& requestedDrink = currentCustomer->getDrinkRequest();
+    const std::string customerName = currentCustomer->getName();
+    const bool wasAlreadyDrunk = currentCustomer->isDrunk();
+    const Recipe requestedDrink = currentCustomer->getDrinkRequest();
     const double basePrice = requestedDrink.getMenuPrice();
     const double satisfaction = currentCustomer->receiveDrink(currentDrink);
-    const double paidAmount = (1 + (satisfaction - 5) * 0.1) * basePrice;
-    const double tips = paidAmount - basePrice;
 
-    dailyProfit += paidAmount;
-    totalBarEarnings += paidAmount;
     servedRecipes.push_back(requestedDrink);
 
     std::cout << "Drink served.\n";
     std::cout << "Satisfaction: " << satisfaction << "\n";
-    std::cout << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
+
+    if(wasAlreadyDrunk) {
+        if(rollBadDrunkEvent(*currentCustomer)) {
+            const double stolenAmount = dailyProfit * 0.10;
+
+            dailyProfit -= stolenAmount;
+            totalBarEarnings -= stolenAmount;
+
+            std::cout << customerName << " stole money from the tip jar!\n";
+            std::cout << "Money received: -" << stolenAmount << "$ (-" << stolenAmount << "$ tips)\n";
+        } else {
+            const double paidAmount = 3 * basePrice;
+            const double tips = paidAmount - basePrice;
+
+            dailyProfit += paidAmount;
+            totalBarEarnings += paidAmount;
+
+            std::cout << customerName << " left a very generous tip!\n";
+            std::cout << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
+        }
+
+        customers.erase(customerName);
+        currentCustomer = nullptr;
+    } else {
+        const double paidAmount = (1 + (satisfaction - 5) * 0.1) * basePrice;
+        const double tips = paidAmount - basePrice;
+
+        dailyProfit += paidAmount;
+        totalBarEarnings += paidAmount;
+
+        std::cout << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
+    }
+
     std::cout << "Total shift earnings: " << dailyProfit << "$\n\n";
 
     currentDrink.reset();
     advanceTime();
 
-    if(!isShiftComplete()) {
+    if(!isShiftComplete() && !customers.empty()) {
         pickNextCustomer();
     }
 }
