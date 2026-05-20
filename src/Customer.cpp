@@ -1,5 +1,7 @@
 #include "Customer.h"
 
+#include "MenuRegistry.h"
+
 #include <algorithm>
 #include <cmath>
 #include <ranges>
@@ -44,12 +46,12 @@ double calculateCriticClosenessScore(const double expected, const double actual)
 }
 }
 
-Customer::Customer(std::string name, double intoxicationLimitMl, Recipe drinkRequest)
+Customer::Customer(std::string name, double intoxicationLimitMl)
     : name(std::move(name)),
       satisfaction(10),
       alcoholConsumedMl(0),
       intoxicationLimitMl(intoxicationLimitMl),
-      drinkRequest(std::move(drinkRequest)),
+      drinkRequest(MenuRegistry::getInstance().getRandomRecipe()),
       hasPreviousOrder(false) {
 }
 
@@ -69,6 +71,10 @@ void Customer::setDrinkRequest(const Recipe& newDrinkRequest) {
     drinkRequest = newDrinkRequest;
 }
 
+void Customer::chooseRandomDrinkRequest() {
+    drinkRequest = MenuRegistry::getInstance().getRandomRecipe();
+}
+
 double Customer::receiveDrink(const Concoction& drink) {
     const double currentOrderSatisfaction = std::max(0.0, calculateCurrentOrderSatisfaction(drink));
     const double previousSatisfaction = hasPreviousOrder ? satisfaction : 10.0;
@@ -80,8 +86,8 @@ double Customer::receiveDrink(const Concoction& drink) {
     return satisfaction;
 }
 
-CasualPatron::CasualPatron(std::string name, Recipe drinkRequest)
-    : Customer(std::move(name), 80, std::move(drinkRequest)) {
+CasualPatron::CasualPatron(std::string name)
+    : Customer(std::move(name), 80) {
 }
 
 double CasualPatron::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
@@ -97,8 +103,8 @@ std::string CasualPatron::getType() const {
     return "Casual Patron";
 }
 
-HeavyDrinker::HeavyDrinker(std::string name, Recipe drinkRequest)
-    : Customer(std::move(name), 140, std::move(drinkRequest)) {
+HeavyDrinker::HeavyDrinker(std::string name)
+    : Customer(std::move(name), 140) {
 }
 
 double HeavyDrinker::calculateCurrentOrderSatisfaction(const Concoction& drink) const {
@@ -118,8 +124,8 @@ std::string HeavyDrinker::getType() const {
     return "Heavy Drinker";
 }
 
-Critic::Critic(std::string name, Recipe drinkRequest)
-    : Customer(std::move(name), 60, std::move(drinkRequest)) {
+Critic::Critic(std::string name)
+    : Customer(std::move(name), 60) {
 }
 
 double Critic::calculateCurrentOrderSatisfaction(const Concoction& drink) const {

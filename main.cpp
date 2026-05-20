@@ -49,8 +49,7 @@ int main() {
             std::cout << "Drink served.\n";
             std::cout << "Satisfaction: " << satisfaction << "\n";
             currentDrink.reset();
-            customer = CustomerFactory::createCustomer("Alex");
-            customer->setDrinkRequest(CustomerFactory::createRandomDrinkRequest());
+            customer->chooseRandomDrinkRequest();
             std::cout << customer->getName() << " - " << customer->getType() << "\n";
             std::cout << "Hello! I would like a " << customer->getDrinkRequest().getName() << "!\n";
         } else if(command == "discard" || command == "dispose") {

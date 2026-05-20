@@ -4,6 +4,7 @@
 #include "Drink.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 class MenuRegistry {
@@ -11,6 +12,9 @@ private:
     std::vector<Recipe> recipes;
 
     MenuRegistry();
+    static Recipe makeRecipeFromVolumes(const std::string& name,
+                                        double menuPrice,
+                                        const std::vector<std::pair<std::string, double>>& ingredientVolumes);
 
 public:
     MenuRegistry(const MenuRegistry& other) = delete;
@@ -18,7 +22,9 @@ public:
 
     static MenuRegistry& getInstance();
 
-    // TODO: add recipe loading, lookup, and menu access.
+    [[nodiscard]] const std::vector<Recipe>& getRecipes() const;
+    [[nodiscard]] const Recipe* findRecipe(const std::string& name) const;
+    [[nodiscard]] Recipe getRandomRecipe() const;
 };
 
 #endif

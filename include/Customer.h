@@ -17,7 +17,7 @@ protected:
     [[nodiscard]] virtual double calculateCurrentOrderSatisfaction(const Concoction& drink) const = 0;
 
 public:
-    Customer(std::string name, double intoxicationLimitMl, Recipe drinkRequest);
+    Customer(std::string name, double intoxicationLimitMl);
     virtual ~Customer() = default;
 
     [[nodiscard]] const std::string& getName() const;
@@ -25,6 +25,7 @@ public:
     [[nodiscard]] const Recipe& getDrinkRequest() const;
 
     void setDrinkRequest(const Recipe& newDrinkRequest);
+    void chooseRandomDrinkRequest();
     double receiveDrink(const Concoction& drink);
 
     [[nodiscard]] virtual double calculateTip(double drinkAccuracy) const = 0;
@@ -33,7 +34,7 @@ public:
 
 class CasualPatron : public Customer {
 public:
-    CasualPatron(std::string name, Recipe drinkRequest);
+    explicit CasualPatron(std::string name);
 
     [[nodiscard]] double calculateCurrentOrderSatisfaction(const Concoction& drink) const override;
     [[nodiscard]] double calculateTip(double drinkAccuracy) const override;
@@ -42,7 +43,7 @@ public:
 
 class HeavyDrinker : public Customer {
 public:
-    HeavyDrinker(std::string name, Recipe drinkRequest);
+    explicit HeavyDrinker(std::string name);
 
     [[nodiscard]] double calculateCurrentOrderSatisfaction(const Concoction& drink) const override;
     [[nodiscard]] double calculateTip(double drinkAccuracy) const override;
@@ -51,7 +52,7 @@ public:
 
 class Critic : public Customer {
 public:
-    Critic(std::string name, Recipe drinkRequest);
+    explicit Critic(std::string name);
 
     [[nodiscard]] double calculateCurrentOrderSatisfaction(const Concoction& drink) const override;
     [[nodiscard]] double calculateTip(double drinkAccuracy) const override;
