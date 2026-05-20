@@ -29,8 +29,5 @@ public:
     GlassOverflowException();
 };
 
-class IntoxicatedCustomerException : public GameRuleException {
-    // TODO: throw this when a customer should be refused service.
-};
 
 #endif
