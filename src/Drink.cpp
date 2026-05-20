@@ -1,5 +1,7 @@
 #include "Drink.h"
 
+#include "Exceptions.h"
+
 #include <cctype>
 #include <istream>
 #include <iostream>
@@ -112,6 +114,31 @@ double getKnownIngredientSweetness(const std::string& ingredientName) {
     }
 
     return 0;
+}
+
+bool isKnownIngredientName(const std::string& ingredientName) {
+    const std::string normalizedIngredientName = normalizedName(ingredientName);
+
+    return normalizedIngredientName == "gin" ||
+           normalizedIngredientName == "vermouth" ||
+           normalizedIngredientName == "vodka" ||
+           normalizedIngredientName == "whiskey" ||
+           normalizedIngredientName == "rum" ||
+           normalizedIngredientName == "tequila" ||
+           normalizedIngredientName == "aperol" ||
+           normalizedIngredientName == "sparkling wine" ||
+           normalizedIngredientName == "tonic" ||
+           normalizedIngredientName == "soda" ||
+           normalizedIngredientName == "orange juice" ||
+           normalizedIngredientName == "cola" ||
+           normalizedIngredientName == "ginger beer" ||
+           normalizedIngredientName == "simple syrup" ||
+           normalizedIngredientName == "grenadine" ||
+           normalizedIngredientName == "ice" ||
+           normalizedIngredientName == "lemon" ||
+           normalizedIngredientName == "lime" ||
+           normalizedIngredientName == "grapefruit" ||
+           normalizedIngredientName == "orange";
 }
 
 Ingredient* createKnownPouredIngredient(const std::string& ingredientName, int amount) {
@@ -413,6 +440,10 @@ bool Concoction::containsIngredient(const std::string& ingredientName) const {
     return false;
 }
 
+bool Concoction::isKnownIngredient(const std::string& ingredientName) {
+    return isKnownIngredientName(ingredientName);
+}
+
 void Concoction::pour(const std::string& ingredientName, int amount) {
     if(amount <= 0) {
         std::cout << "Invalid amount. Nothing was poured.\n";
@@ -422,14 +453,12 @@ void Concoction::pour(const std::string& ingredientName, int amount) {
     Ingredient* ingredient = createKnownPouredIngredient(ingredientName, amount);
 
     if(ingredient == nullptr) {
-        std::cout << "Unknown ingredient: " << ingredientName << "\n";
-        return;
+        throw InvalidIngredientException();
     }
 
     if(getTotalVolume() + ingredient->getVolumeMl() > capacityMl) {
-        std::cout << "Cannot pour " << ingredientName << ": glass capacity exceeded.\n";
         delete ingredient;
-        return;
+        throw GlassOverflowException();
     }
 
     if(ingredientCount == ingredientCapacity) {

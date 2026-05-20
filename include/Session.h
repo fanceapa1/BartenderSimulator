@@ -28,7 +28,7 @@ private:
     void handleServe();
     void handleDiscard();
     void handleRefuse();
-    void handleMenu() const;
+    static void handleMenu();
     void advanceTime();
 
     [[nodiscard]] bool isShiftComplete() const;

@@ -1,6 +1,7 @@
 #include "Session.h"
 
 #include "CustomerFactory.h"
+#include "Exceptions.h"
 #include "MenuRegistry.h"
 
 #include <algorithm>
@@ -59,22 +60,26 @@ void Session::run() {
 
     while(!isShiftComplete() && !customers.empty() &&
           std::cout << "Select action (pour/serve/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
-        if(command == "pour") {
-            handlePour();
-        } else if(command == "serve") {
-            handleServe();
-        } else if(command == "discard" || command == "dispose") {
-            handleDiscard();
-        } else if(command == "refuse") {
-            handleRefuse();
-        } else if(command == "menu") {
-            handleMenu();
-        } else if(command == "exit") {
-            break;
-        } else if(command.empty()) {
-            continue;
-        } else {
-            std::cout << "Invalid command: " << command << "\n";
+        try {
+            if(command == "pour") {
+                handlePour();
+            } else if(command == "serve") {
+                handleServe();
+            } else if(command == "discard" || command == "dispose") {
+                handleDiscard();
+            } else if(command == "refuse") {
+                handleRefuse();
+            } else if(command == "menu") {
+                handleMenu();
+            } else if(command == "exit") {
+                break;
+            } else if(command.empty()) {
+                continue;
+            } else {
+                throw InvalidCommandException();
+            }
+        } catch(const GameRuleException& exception) {
+            std::cout << exception.what() << "\n";
         }
     }
 
@@ -161,6 +166,10 @@ void Session::handlePour() {
     if(!std::getline(std::cin, ingredientName)) {
         std::cout << "Incomplete pour command.\n";
         return;
+    }
+
+    if(!Concoction::isKnownIngredient(ingredientName)) {
+        throw InvalidIngredientException();
     }
 
     std::cout << "Enter amount:\n";
@@ -262,7 +271,7 @@ void Session::handleRefuse() {
     }
 }
 
-void Session::handleMenu() const {
+void Session::handleMenu() {
     MenuRegistry::getInstance().printMenu(std::cout);
 }
 
