@@ -15,6 +15,7 @@ public:
     [[nodiscard]] const std::string& getName() const;
     [[nodiscard]] int getVolumeMl() const;
     [[nodiscard]] virtual double getABV() const = 0;
+    [[nodiscard]] virtual Ingredient* clone() const = 0;
 };
 
 class Alcohol : public Ingredient {
@@ -24,6 +25,7 @@ private:
 public:
     Alcohol(std::string name, int volumeMl, double abv);
     [[nodiscard]] double getABV() const override;
+    [[nodiscard]] Ingredient* clone() const override;
 };
 
 class Mixer : public Ingredient {
@@ -35,6 +37,7 @@ public:
 
     [[nodiscard]] double getSweetness() const;
     [[nodiscard]] double getABV() const override;
+    [[nodiscard]] Ingredient* clone() const override;
 };
 
 class Garnish : public Ingredient {
@@ -42,6 +45,7 @@ public:
     Garnish(std::string name, int volumeMl);
 
     [[nodiscard]] double getABV() const override;
+    [[nodiscard]] Ingredient* clone() const override;
 };
 
 #endif

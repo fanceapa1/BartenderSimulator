@@ -19,15 +19,19 @@ private:
     int successfulOrderCount;
     Customer* currentCustomer;
     Concoction currentDrink;
+    Recipe lastServedRecipe;
+    Concoction lastServedConcoction;
+    bool hasLastServedOrder;
     bool leaderboardFinalized;
 
     static double totalBarEarnings;
 
     void createCustomerPool();
     void pickNextCustomer();
-    void printCurrentCustomer() const;
+    void printCurrentCustomer(bool repeatsLastOrder) const;
     void handlePour();
     void handleServe();
+    void handleServeLast();
     void handleDiscard();
     void handleRefuse();
     static void handleMenu();

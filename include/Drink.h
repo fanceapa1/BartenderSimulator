@@ -58,8 +58,8 @@ private:
 public:
     Concoction();
     Concoction(std::string name, double capacityMl);
-    Concoction(const Concoction& other) = delete;
-    Concoction& operator=(const Concoction& other) = delete;
+    Concoction(const Concoction& other);
+    Concoction& operator=(const Concoction& other);
     ~Concoction() override;
 
     [[nodiscard]] std::size_t getIngredientCount() const;

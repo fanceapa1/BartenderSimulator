@@ -20,6 +20,7 @@ constexpr int ShiftLengthMinutes = 4 * 60;
 constexpr int MinutesPerCustomer = 15;
 constexpr int MaxCustomerSlots = ShiftLengthMinutes / MinutesPerCustomer;
 constexpr double SuccessfulOrderSatisfactionThreshold = 7.5;
+constexpr double RepeatLastOrderChance = 0.15;
 constexpr const char* LeaderboardFilename = "leaderboard.txt";
 constexpr const char* SuccessfulOrdersLeaderboardFilename = "leaderboardNOrders.txt";
 
@@ -32,6 +33,11 @@ std::mt19937& randomGenerator() {
 bool rollBadDrunkEvent(const Customer& customer) {
     std::bernoulli_distribution badEventDistribution(customer.getDrunkEventBadChance());
     return badEventDistribution(randomGenerator());
+}
+
+bool rollRepeatLastOrder() {
+    std::bernoulli_distribution repeatOrderDistribution(RepeatLastOrderChance);
+    return repeatOrderDistribution(randomGenerator());
 }
 
 std::vector<std::string> makePossibleNames() {
@@ -54,6 +60,9 @@ Session::Session()
       successfulOrderCount(0),
       currentCustomer(nullptr),
       currentDrink(),
+      lastServedRecipe(),
+      lastServedConcoction(),
+      hasLastServedOrder(false),
       leaderboardFinalized(false) {
     createCustomerPool();
     pickNextCustomer();
@@ -63,12 +72,14 @@ void Session::run() {
     std::string command;
 
     while(!isShiftComplete() && !customers.empty() &&
-          std::cout << "Select action (pour/serve/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
+          std::cout << "Select action (pour/serve/serve_last/discard/refuse/menu):\n" && std::getline(std::cin, command)) {
         try {
             if(command == "pour") {
                 handlePour();
             } else if(command == "serve") {
                 handleServe();
+            } else if(command == "serve_last") {
+                handleServeLast();
             } else if(command == "discard" || command == "dispose") {
                 handleDiscard();
             } else if(command == "refuse") {
@@ -149,11 +160,19 @@ void Session::pickNextCustomer() {
     std::advance(customerIt, static_cast<std::ptrdiff_t>(customerDistribution(randomGenerator())));
 
     currentCustomer = customerIt->second.get();
-    currentCustomer->chooseRandomDrinkRequest();
-    printCurrentCustomer();
+
+    const bool repeatsLastOrder = hasLastServedOrder && rollRepeatLastOrder();
+
+    if(repeatsLastOrder) {
+        currentCustomer->setDrinkRequest(lastServedRecipe);
+    } else {
+        currentCustomer->chooseRandomDrinkRequest();
+    }
+
+    printCurrentCustomer(repeatsLastOrder);
 }
 
-void Session::printCurrentCustomer() const {
+void Session::printCurrentCustomer(bool repeatsLastOrder) const {
     if(currentCustomer == nullptr) {
         return;
     }
@@ -166,7 +185,12 @@ void Session::printCurrentCustomer() const {
     }
 
     std::cout << "\n";
-    std::cout << "Hello! I would like a " << currentCustomer->getDrinkRequest().getName() << "!\n";
+
+    if(repeatsLastOrder) {
+        std::cout << "Hey! I want what they just had!\n";
+    } else {
+        std::cout << "Hello! I would like a " << currentCustomer->getDrinkRequest().getName() << "!\n";
+    }
 }
 
 void Session::handlePour() {
@@ -222,6 +246,10 @@ void Session::handleServe() {
         ++successfulOrderCount;
     }
 
+    lastServedRecipe = requestedDrink;
+    lastServedConcoction = currentDrink;
+    hasLastServedOrder = true;
+
     std::cout << "Drink served.\n";
     std::cout << "Satisfaction: " << satisfaction << "\n";
 
@@ -265,6 +293,17 @@ void Session::handleServe() {
     if(!isShiftComplete() && !customers.empty()) {
         pickNextCustomer();
     }
+}
+
+void Session::handleServeLast() {
+    if(!hasLastServedOrder) {
+        std::cout << "No previous drink to serve.\n";
+        return;
+    }
+
+    currentDrink = lastServedConcoction;
+    std::cout << "Serving a copy of the last drink.\n";
+    handleServe();
 }
 
 void Session::handleDiscard() {

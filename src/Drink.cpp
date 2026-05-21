@@ -374,6 +374,35 @@ Concoction::Concoction(std::string name, double capacityMl)
     : Drink(std::move(name), capacityMl), ingredients(nullptr), ingredientCount(0), ingredientCapacity(0) {
 }
 
+Concoction::Concoction(const Concoction& other)
+    : Drink(other.name, other.capacityMl), ingredients(nullptr), ingredientCount(0), ingredientCapacity(0) {
+    try {
+        reserveIngredients(other.ingredientCapacity);
+
+        for(std::size_t index = 0; index < other.ingredientCount; ++index) {
+            ingredients[ingredientCount] = other.ingredients[index]->clone();
+            ++ingredientCount;
+        }
+    } catch(...) {
+        clearIngredients();
+        throw;
+    }
+}
+
+Concoction& Concoction::operator=(const Concoction& other) {
+    if(this != &other) {
+        Concoction copy(other);
+
+        std::swap(name, copy.name);
+        std::swap(capacityMl, copy.capacityMl);
+        std::swap(ingredients, copy.ingredients);
+        std::swap(ingredientCount, copy.ingredientCount);
+        std::swap(ingredientCapacity, copy.ingredientCapacity);
+    }
+
+    return *this;
+}
+
 Concoction::~Concoction() {
     clearIngredients();
 }
