@@ -14,6 +14,7 @@ public:
 
     [[nodiscard]] const std::string& getName() const;
     [[nodiscard]] int getVolumeMl() const;
+    void addVolumeMl(int extraVolumeMl);
     [[nodiscard]] virtual double getABV() const = 0;
     [[nodiscard]] virtual Ingredient* clone() const = 0;
 };

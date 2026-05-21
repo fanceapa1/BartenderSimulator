@@ -5,6 +5,7 @@
 #include <cctype>
 #include <istream>
 #include <iostream>
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
@@ -477,32 +478,42 @@ bool Concoction::isKnownIngredient(const std::string& ingredientName) {
     return isKnownIngredientName(ingredientName);
 }
 
-void Concoction::pour(const std::string& ingredientName, int amount) {
-    if(amount <= 0) {
+Ingredient* Concoction::createPouredIngredient(const std::string& ingredientName, int amount) {
+    return createKnownPouredIngredient(ingredientName, amount);
+}
+
+Concoction& Concoction::operator+=(const Ingredient& ingredient) {
+    if(ingredient.getVolumeMl() <= 0) {
         std::cout << "Invalid amount. Nothing was poured.\n";
-        return;
+        return *this;
     }
 
-    Ingredient* ingredient = createKnownPouredIngredient(ingredientName, amount);
-
-    if(ingredient == nullptr) {
-        throw InvalidIngredientException();
-    }
-
-    if(getTotalVolume() + ingredient->getVolumeMl() > getCapacityMl()) {
-        delete ingredient;
+    if(getTotalVolume() + ingredient.getVolumeMl() > getCapacityMl()) {
         throw GlassOverflowException();
     }
+
+    const std::string normalizedIngredientName = normalizedName(ingredient.getName());
+
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        if(normalizedName(ingredients[index]->getName()) == normalizedIngredientName) {
+            ingredients[index]->addVolumeMl(ingredient.getVolumeMl());
+            std::cout << "Poured " << ingredients[index]->getName() << ".\n";
+            return *this;
+        }
+    }
+
+    std::unique_ptr<Ingredient> ingredientCopy(ingredient.clone());
 
     if(getIngredientCount() == getIngredientCapacity()) {
         const std::size_t nextCapacity = getIngredientCapacity() == 0 ? 4 : getIngredientCapacity() * 2;
         reserveIngredients(nextCapacity);
     }
 
-    ingredients[getIngredientCount()] = ingredient;
+    ingredients[getIngredientCount()] = ingredientCopy.release();
     ++ingredientCount;
 
-    std::cout << "Poured " << ingredient->getName() << ".\n";
+    std::cout << "Poured " << ingredients[getIngredientCount() - 1]->getName() << ".\n";
+    return *this;
 }
 
 void Concoction::printIngredients(std::ostream& out) const {

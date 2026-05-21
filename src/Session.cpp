@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <random>
 #include <sstream>
 #include <string>
@@ -221,7 +222,18 @@ void Session::handlePour() {
         return;
     }
 
-    currentDrink.pour(ingredientName, amount);
+    if(amount <= 0) {
+        std::cout << "Invalid amount. Nothing was poured.\n";
+        return;
+    }
+
+    std::unique_ptr<Ingredient> ingredient(Concoction::createPouredIngredient(ingredientName, amount));
+
+    if(ingredient == nullptr) {
+        throw InvalidIngredientException();
+    }
+
+    currentDrink += *ingredient;
     std::cout << "Current volume: " << currentDrink.getTotalVolume() << " ml\n";
     std::cout << "Current ABV: " << currentDrink.getABV() * 100 << "%\n";
     currentDrink.printIngredients(std::cout);

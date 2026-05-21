@@ -14,6 +14,10 @@ int Ingredient::getVolumeMl() const {
     return volumeMl;
 }
 
+void Ingredient::addVolumeMl(int extraVolumeMl) {
+    volumeMl += extraVolumeMl;
+}
+
 Alcohol::Alcohol(std::string name, int volumeMl, double abv)
     : Ingredient(std::move(name), volumeMl), abv(abv) {
 }

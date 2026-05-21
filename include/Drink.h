@@ -69,8 +69,9 @@ public:
     [[nodiscard]] double getSweetness() const;
     [[nodiscard]] bool containsIngredient(const std::string& ingredientName) const;
     [[nodiscard]] static bool isKnownIngredient(const std::string& ingredientName);
+    [[nodiscard]] static Ingredient* createPouredIngredient(const std::string& ingredientName, int amount);
 
-    void pour(const std::string& ingredientName, int amount);
+    Concoction& operator+=(const Ingredient& ingredient);
     void printIngredients(std::ostream& out) const;
     void reset();
 };
