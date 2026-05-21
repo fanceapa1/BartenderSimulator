@@ -60,12 +60,13 @@ void Leaderboard<T>::saveToFile(const std::string& filename) const {
 }
 
 template <typename T>
-void Leaderboard<T>::print(std::ostream& out) const {
-    out << "Leaderboard:\n";
+void Leaderboard<T>::print(std::ostream& out, const std::string& title, const std::string& suffix) const {
+    out << title << ":\n";
 
     for(std::size_t index = 0; index < entries.size(); ++index) {
-        out << index + 1 << ". " << entries[index].name << " - " << entries[index].score << "$\n";
+        out << index + 1 << ". " << entries[index].name << " - " << entries[index].score << suffix << "\n";
     }
 }
 
 template class Leaderboard<double>;
+template class Leaderboard<int>;

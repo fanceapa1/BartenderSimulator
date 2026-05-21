@@ -20,9 +20,10 @@ public:
     void addEntry(std::string name, T score);
     void sortByScoreDescending();
     void saveToFile(const std::string& filename) const;
-    void print(std::ostream& out) const;
+    void print(std::ostream& out, const std::string& title, const std::string& suffix) const;
 };
 
 extern template class Leaderboard<double>;
+extern template class Leaderboard<int>;
 
 #endif

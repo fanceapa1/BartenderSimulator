@@ -16,6 +16,7 @@ private:
     std::map<std::string, std::unique_ptr<Customer>> customers;
     std::vector<Recipe> servedRecipes;
     int completedCustomerCount;
+    int successfulOrderCount;
     Customer* currentCustomer;
     Concoction currentDrink;
     bool leaderboardFinalized;

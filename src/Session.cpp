@@ -19,7 +19,9 @@ namespace {
 constexpr int ShiftLengthMinutes = 4 * 60;
 constexpr int MinutesPerCustomer = 15;
 constexpr int MaxCustomerSlots = ShiftLengthMinutes / MinutesPerCustomer;
+constexpr double SuccessfulOrderSatisfactionThreshold = 7.5;
 constexpr const char* LeaderboardFilename = "leaderboard.txt";
+constexpr const char* SuccessfulOrdersLeaderboardFilename = "leaderboardNOrders.txt";
 
 std::mt19937& randomGenerator() {
     static std::random_device randomDevice;
@@ -49,6 +51,7 @@ Session::Session()
     : currentMinuteOfShift(0),
       dailyProfit(0),
       completedCustomerCount(0),
+      successfulOrderCount(0),
       currentCustomer(nullptr),
       currentDrink(),
       leaderboardFinalized(false) {
@@ -110,9 +113,15 @@ std::string Session::getCurrentClockTime() const {
 }
 
 void Session::displayLeaderboard() {
-    Leaderboard<double> leaderboard;
-    leaderboard.loadFromFile(LeaderboardFilename);
-    leaderboard.print(std::cout);
+    Leaderboard<double> earningsLeaderboard;
+    earningsLeaderboard.loadFromFile(LeaderboardFilename);
+    earningsLeaderboard.print(std::cout, "Shift earnings leaderboard", "$");
+
+    std::cout << "\n";
+
+    Leaderboard<int> successfulOrdersLeaderboard;
+    successfulOrdersLeaderboard.loadFromFile(SuccessfulOrdersLeaderboardFilename);
+    successfulOrdersLeaderboard.print(std::cout, "Successful orders leaderboard", " successful orders");
 }
 
 void Session::createCustomerPool() {
@@ -209,6 +218,10 @@ void Session::handleServe() {
 
     servedRecipes.push_back(requestedDrink);
 
+    if(satisfaction > SuccessfulOrderSatisfactionThreshold) {
+        ++successfulOrderCount;
+    }
+
     std::cout << "Drink served.\n";
     std::cout << "Satisfaction: " << satisfaction << "\n";
 
@@ -286,6 +299,7 @@ void Session::finalizeSession() {
     leaderboardFinalized = true;
 
     std::cout << "Final shift earnings: " << getDailyProfit() << "$\n";
+    std::cout << "Successful orders: " << successfulOrderCount << "\n";
     std::cout << "Enter leaderboard name:\n";
 
     std::string playerName;
@@ -294,11 +308,18 @@ void Session::finalizeSession() {
         playerName = "Anonymous";
     }
 
-    Leaderboard<double> leaderboard;
-    leaderboard.loadFromFile(LeaderboardFilename);
-    leaderboard.addEntry(playerName, getDailyProfit());
-    leaderboard.sortByScoreDescending();
-    leaderboard.saveToFile(LeaderboardFilename);
+    Leaderboard<double> earningsLeaderboard;
+    earningsLeaderboard.loadFromFile(LeaderboardFilename);
+    earningsLeaderboard.addEntry(playerName, getDailyProfit());
+    earningsLeaderboard.sortByScoreDescending();
+    earningsLeaderboard.saveToFile(LeaderboardFilename);
+
+    Leaderboard<int> successfulOrdersLeaderboard;
+    successfulOrdersLeaderboard.loadFromFile(SuccessfulOrdersLeaderboardFilename);
+    successfulOrdersLeaderboard.addEntry(playerName, successfulOrderCount);
+    successfulOrdersLeaderboard.sortByScoreDescending();
+    successfulOrdersLeaderboard.saveToFile(SuccessfulOrdersLeaderboardFilename);
+
     displayLeaderboard();
 }
 
