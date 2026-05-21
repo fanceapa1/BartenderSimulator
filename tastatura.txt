@@ -1,2 +1,26 @@
+menu
+pour
+Gin
+50
+pour
+Tonic
+100
+pour
+Ice
+1
+discard
+pour
+Vodka
+50
+pour
+Orange Juice
+150
+pour
+Orange
+1
+serve
+serve_last
+dispose
+refuse
 exit
 CI Player
