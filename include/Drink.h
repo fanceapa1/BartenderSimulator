@@ -67,6 +67,7 @@ public:
     [[nodiscard]] double getTotalVolume() const;
     [[nodiscard]] double getABV() const;
     [[nodiscard]] double getSweetness() const;
+    [[nodiscard]] bool hasAlcohol() const;
     [[nodiscard]] bool containsIngredient(const std::string& ingredientName) const;
     [[nodiscard]] static bool isKnownIngredient(const std::string& ingredientName);
     [[nodiscard]] static Ingredient* createPouredIngredient(const std::string& ingredientName, int amount);

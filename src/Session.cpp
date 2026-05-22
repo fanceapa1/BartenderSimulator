@@ -247,6 +247,7 @@ void Session::handleServe() {
 
     const std::string customerName = currentCustomer->getName();
     const bool wasAlreadyDrunk = currentCustomer->isDrunk();
+    const bool servedAlcohol = currentDrink.hasAlcohol();
     const Recipe requestedDrink = currentCustomer->getDrinkRequest();
     const double basePrice = requestedDrink.getMenuPrice();
     currentCustomer->receiveDrink(currentDrink);
@@ -265,7 +266,7 @@ void Session::handleServe() {
     std::cout << "Drink served.\n";
     std::cout << "Satisfaction: " << satisfaction << "\n";
 
-    if(wasAlreadyDrunk) {
+    if(wasAlreadyDrunk && servedAlcohol) {
         if(rollBadDrunkEvent(*currentCustomer)) {
             const double stolenAmount = dailyProfit * 0.10;
 

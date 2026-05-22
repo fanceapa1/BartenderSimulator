@@ -462,6 +462,18 @@ double Concoction::getSweetness() const {
     return sweetness / totalVolume;
 }
 
+bool Concoction::hasAlcohol() const {
+    for(std::size_t index = 0; index < ingredientCount; ++index) {
+        const auto* alcohol = dynamic_cast<const Alcohol*>(ingredients[index]);
+
+        if(alcohol != nullptr) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Concoction::containsIngredient(const std::string& ingredientName) const {
     const std::string normalizedIngredientName = normalizedName(ingredientName);
 
