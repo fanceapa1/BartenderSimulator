@@ -1,101 +1,35 @@
-# Nu primesc notă pentru că nu am pus titlu și descriere
+# Bartender Simulator
 
-### Folosiți template-ul corespunzător grupei voastre!
+### C++ OOP Project - FMI Unibuc
 
-| Laborant  | Link template                                |
-|-----------|----------------------------------------------|
-| Dragoș B  | https://github.com/Ionnier/oop-template      |
-| Tiberiu M | https://github.com/MaximTiberiu/oop-template |
-| Marius MC | https://github.com/mcmarius/oop-template     |
 
-## Instrucțiuni de compilare
+## Description
 
-Proiectul este configurat cu CMake.
+Bartender Simulator is an interactive terminal game, played through text commands.
+You are playing the role of a bartender, operating a nightly shift at a busy bar. Customers come up to you and ask for different drinks off the menu. Your job is to follow the recipes as closely as possible and get as many tips as you can by the end of the night.
 
-Instrucțiuni pentru terminal:
+## Gameplay & Mechanics
 
-1. Pasul de configurare
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-# sau ./scripts/cmake.sh configure
-```
+Your shift starts at 12AM and ends at 4AM. Every 15 minutes, a customer will come up to the bar with a drink request.
 
-Sau pe Windows cu GCC:
-```sh
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
-# sau ./scripts/cmake.sh configure -g Ninja
-```
+![terminal example](image.png)
 
-La acest pas putem cere să generăm fișiere de proiect pentru diverse medii de lucru.
+The customer's satisfaction with your concoction will be based on three different criteria: **ingredients used**, **ABV%** and **sweetness**. The purpose is to get these values as close to the menu recipe as possible. Your tip will be calculated based on the client's satisfaction.
 
-## Cerințe obligatorii
+![terminal example2](image-1.png)
 
-Nerespectarea duce la nepunctarea proiectului
+### Commands
+![terminal example3](image-2.png)
+- **pour**: Start pouring an ingredient into the glass. After typing this command, you will be prompted to input the ingredient name and amount to be poured. Liquids are to be poured in *ml*, while garnishes (like lemon, ice, etc.) are to be poured in *units* and later be converted into ml. Glass capacity is 500ml.
+- **serve**: Serve the drink currently in the concoction glass to the customer. You will then receive your payment and another customer will come up to the counter. 
+- **serve_last**: Serve the same drink as the one you just served to the last customer. This is useful because customers can ask to have what the last person just had, if it looked good.
+- **discard**: Empties the current concoction glass. Useful if you made a mistake and want to start over.
+- **refuse**: Refuse service of the current customer. Useful if you don't want to deal with drunk customers or don't feel like preparing a certain drink.
+- **menu**: Display all bar drinks and their recipes.
+- **exit**: Stop program execution.
 
-  - programul va fi scris în C++
-  - programul va avea un meniu interactiv (doar pentru ilustrarea funcționalității)
-  - programul nu are erori de compilare
-  - fară variabile globale
-  - datele membre private(sau protected)
-  - GitHub Actions trecute
-  - commit-uri pe Git adecvate si punctuale
-  - folosirea a funcționalităților limbajului fără sens
-  - folosirea a funcționlităților limbajului cu scopul de a încălca "legal" o altă regulă
-      - folosirea excesivă a claselor friend
-      - folosirea excesviă a elementelor statice
-  - lipsa separarea implementarii de definitie
-
-## Cerințe
-- pentru fiecare cerință (sau subcerință) neîndeplinită se scade **1** punct
-- [ ] definirea a minim **2-3 ieararhii de clase** care sa interactioneze in cadrul temei alese (fie prin compunere, agregare sau doar sa apeleze metodele celeilalte intr-un mod logic)
-  - minim o clasa cu:
-    - [ ] constructori de inițializare [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] constructor supraîncărcat [*](https://github.com/Ionnier/poo/tree/main/labs/L02#supra%C3%AEnc%C4%83rcarea-func%C8%9Biilor)
-    - [ ] constructori de copiere [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] `operator=` de copiere [*](https://github.com/Ionnier/poo/tree/main/labs/L02#supra%C3%AEnc%C4%83rcarea-operatorilor)
-    - [ ] destructor [*](https://github.com/Ionnier/poo/tree/main/labs/L02#crearea-obiectelor)
-    - [ ] `operator<<` pentru afișare (std::ostream) [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L123)
-    - [ ] `operator>>` pentru citire (std::istream) [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L128)
-    - [ ] alt operator supraîncărcat ca funcție membră [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L32)
-    - [ ] alt operator supraîncărcat ca funcție non-membră [*](https://github.com/Ionnier/poo/blob/main/labs/L02/fractie.cpp#L39) - nu neaparat ca friend
-  - in derivate
-      - [ ] implementarea funcționalităților alese prin [upcast](https://github.com/Ionnier/poo/tree/main/labs/L04#solu%C8%9Bie-func%C8%9Bii-virtuale-late-binding) și [downcast](https://github.com/Ionnier/poo/tree/main/labs/L04#smarter-downcast-dynamic-cast)
-        - aceasta va fi făcută prin **2-3** metode specifice temei alese
-        - funcțiile pentru citire / afișare sau destructorul nu sunt incluse deși o să trebuiască să le implementați 
-      - [ ] apelarea constructorului din clasa de bază din [constructori din derivate](https://github.com/Ionnier/poo/tree/main/labs/L04#comportamentul-constructorului-la-derivare)
-      - [ ] suprascris [cc](https://github.com/Ionnier/poo/tree/main/labs/L04#comportamentul-constructorului-de-copiere-la-derivare)/op= pentru copieri/atribuiri corecte
-      - [ ] destructor [virtual](https://github.com/Ionnier/poo/tree/main/labs/L04#solu%C8%9Bie-func%C8%9Bii-virtuale-late-binding)
-  - pentru celelalte clase se va definii doar ce e nevoie
-  - minim o ierarhie mai dezvoltata (cu 2-3 clase dintr-o clasa de baza)
-  - ierarhie de clasa se considera si daca exista doar o clasa de bază însă care nu moștenește dintr-o clasă din altă ierarhie
-- [ ] cât mai multe `const` [*](https://github.com/Ionnier/poo/tree/main/labs/L04#reminder-const-everywhere)
-- [ ] funcții și atribute `static` (în clase) [*](https://github.com/Ionnier/poo/tree/main/labs/L04#static)
-  - [ ] 1+ atribute statice non-triviale 
-  - [ ] 1+ funcții statice non-triviale
-- [ ] excepții [*](https://github.com/Ionnier/poo/tree/main/labs/L04#exception-handling)
-  - porniți de la `std::exception`
-  - ilustrați propagarea excepțiilor
-  - ilustrati upcasting-ul în blocurile catch
-  - minim folosit într-un loc în care tratarea erorilor în modurile clasice este mai dificilă
-- [ ] folosirea unei clase abstracte [*](https://github.com/Ionnier/poo/tree/main/labs/L04#clase-abstracte)
-- [ ] clase template
-  - [ ] crearea unei clase template [*](https://github.com/Ionnier/poo/tree/main/labs/L08)
-  - [ ] 2 instanțieri ale acestei clase
-- [ ] STL [*](https://github.com/Ionnier/poo/tree/main/labs/L07#stl)
-  - [ ] utilizarea a două structuri (containere) diferite (vector, list sau orice alt container care e mai mult sau mai putin un array)
-  - [ ] utilizarea a unui algoritm cu funcție lambda (de exemplu, sort, transform)
--  [ ] Design Patterns [*](https://github.com/Ionnier/poo/tree/main/labs/L08)
-  - [ ] utilizarea a două șabloane de proiectare
-
-### Observații
-
-* Pot exista depunctări până la 2p pentru diferite aspecte precum:
-  - memory leak-uri
-  - nefolosirea destructorului virtual la nevoie
-  - abuzarea de diferite concepte (toate funcțiile declarate virtual)
-  - apelarea de funcții virtual în constructori
-
-* În general, acestea sunt prezente în [CppCoreGuideline](https://github.com/isocpp/CppCoreGuidelines/blob/master/CppCoreGuidelines.md), dar nu e nevoie să parcurgeți documentul, doar să scrieți codul suficient de organizat
-
-* folderele `build/` și `install_dir/` sunt adăugate în fișierul `.gitignore` deoarece
-conțin fișiere generate și nu ne ajută să le versionăm.
+### Other Info:
+- The same customer can show up multiple times.
+- Throughout the night, if a customer is served a lot of alcohol, they can become intoxicated. If a drunk customer is served alcohol, they may do something interesting.
+- Customers are of three kinds: casual patrons, heavy drinkers and critics. Each of them has different behaviors and criteria for judging drinks.
+- At the end of your shift, you will be prompted to input your name to be added to the leaderboard. There are two leaderboards: one for highest income and one for most successful orders (orders with a satisfaction score above 7.5).
