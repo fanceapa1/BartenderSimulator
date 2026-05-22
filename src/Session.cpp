@@ -69,7 +69,7 @@ Session::Session()
     pickNextCustomer();
 }
 
-void Session::run() {
+void Session::runTerminal() {
     std::string command;
 
     while(!isShiftComplete() && !customers.empty() &&
@@ -194,6 +194,23 @@ void Session::printCurrentCustomer(bool repeatsLastOrder) const {
     }
 }
 
+void Session::pourIngredient(const std::string& ingredientName, int amount) {
+    if(!Concoction::isKnownIngredient(ingredientName)) {
+        throw InvalidIngredientException();
+    }
+    if(amount <= 0) {
+        return;
+    }
+
+    std::unique_ptr<Ingredient> ingredient(Concoction::createPouredIngredient(ingredientName, amount));
+    if(ingredient == nullptr) {
+        throw InvalidIngredientException();
+    }
+
+    currentDrink += *ingredient;
+    lastMessage = "Poured " + std::to_string(amount) + "ml of " + ingredientName + ".";
+}
+
 void Session::handlePour() {
     std::string ingredientName;
     std::string amountText;
@@ -202,10 +219,6 @@ void Session::handlePour() {
     if(!std::getline(std::cin, ingredientName)) {
         std::cout << "Incomplete pour command.\n";
         return;
-    }
-
-    if(!Concoction::isKnownIngredient(ingredientName)) {
-        throw InvalidIngredientException();
     }
 
     std::cout << "Enter amount:\n";
@@ -227,21 +240,16 @@ void Session::handlePour() {
         return;
     }
 
-    std::unique_ptr<Ingredient> ingredient(Concoction::createPouredIngredient(ingredientName, amount));
+    pourIngredient(ingredientName, amount);
 
-    if(ingredient == nullptr) {
-        throw InvalidIngredientException();
-    }
-
-    currentDrink += *ingredient;
     std::cout << "Current volume: " << currentDrink.getTotalVolume() << " ml\n";
     std::cout << "Current ABV: " << currentDrink.getABV() * 100 << "%\n";
     currentDrink.printIngredients(std::cout);
 }
 
-void Session::handleServe() {
+void Session::serveCurrentDrink() {
     if(currentCustomer == nullptr) {
-        std::cout << "No customer is currently waiting.\n";
+        lastMessage = "No customer is currently waiting.";
         return;
     }
 
@@ -263,8 +271,8 @@ void Session::handleServe() {
     lastServedConcoction = currentDrink;
     hasLastServedOrder = true;
 
-    std::cout << "Drink served.\n";
-    std::cout << "Satisfaction: " << satisfaction << "\n";
+    std::ostringstream messageStream;
+    messageStream << "Drink served.\nSatisfaction: " << satisfaction << "\n";
 
     if(wasAlreadyDrunk && servedAlcohol) {
         if(rollBadDrunkEvent(*currentCustomer)) {
@@ -273,8 +281,8 @@ void Session::handleServe() {
             dailyProfit -= stolenAmount;
             totalBarEarnings -= stolenAmount;
 
-            std::cout << customerName << " stole money from the tip jar!\n";
-            std::cout << "Money received: -" << stolenAmount << "$ (-" << stolenAmount << "$ tips)\n";
+            messageStream << customerName << " stole money from the tip jar!\n";
+            messageStream << "Money received: -" << stolenAmount << "$ (-" << stolenAmount << "$ tips)\n";
         } else {
             const double paidAmount = 3 * basePrice;
             const double tips = paidAmount - basePrice;
@@ -282,8 +290,8 @@ void Session::handleServe() {
             dailyProfit += paidAmount;
             totalBarEarnings += paidAmount;
 
-            std::cout << customerName << " left a very generous tip!\n";
-            std::cout << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
+            messageStream << customerName << " left a very generous tip!\n";
+            messageStream << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
         }
 
         customers.erase(customerName);
@@ -295,10 +303,11 @@ void Session::handleServe() {
         dailyProfit += paidAmount;
         totalBarEarnings += paidAmount;
 
-        std::cout << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
+        messageStream << "Money received: " << paidAmount << "$ (" << tips << "$ tips)\n";
     }
 
-    std::cout << "Total shift earnings: " << dailyProfit << "$\n\n";
+    messageStream << "Total shift earnings: " << dailyProfit << "$\n";
+    lastMessage = messageStream.str();
 
     currentDrink.reset();
     advanceTime();
@@ -308,35 +317,56 @@ void Session::handleServe() {
     }
 }
 
-void Session::handleServeLast() {
+void Session::handleServe() {
+    serveCurrentDrink();
+    std::cout << lastMessage << "\n\n";
+}
+
+void Session::serveLastDrink() {
     if(!hasLastServedOrder) {
-        std::cout << "No previous drink to serve.\n";
+        lastMessage = "No previous drink to serve.";
         return;
     }
 
     currentDrink = lastServedConcoction;
-    std::cout << "Serving a copy of the last drink.\n";
-    handleServe();
+    lastMessage = "Serving a copy of the last drink.";
+    serveCurrentDrink();
 }
 
-void Session::handleDiscard() {
-    std::cout << "Drink disposed.\n";
+void Session::handleServeLast() {
+    serveLastDrink();
+    std::cout << "Serving a copy of the last drink.\n";
+    std::cout << lastMessage << "\n\n";
+}
+
+void Session::discardCurrentDrink() {
+    lastMessage = "Drink disposed.";
     currentDrink.reset();
 }
 
-void Session::handleRefuse() {
+void Session::handleDiscard() {
+    discardCurrentDrink();
+    std::cout << lastMessage << "\n";
+}
+
+void Session::refuseCurrentCustomer() {
     if(currentCustomer == nullptr) {
-        std::cout << "No customer is currently waiting.\n";
+        lastMessage = "No customer is currently waiting.";
         return;
     }
 
-    std::cout << "Service refused.\n\n";
+    lastMessage = "Service refused.";
     currentDrink.reset();
     advanceTime();
 
     if(!isShiftComplete()) {
         pickNextCustomer();
     }
+}
+
+void Session::handleRefuse() {
+    refuseCurrentCustomer();
+    std::cout << lastMessage << "\n\n";
 }
 
 void Session::handleMenu() {

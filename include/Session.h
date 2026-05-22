@@ -23,6 +23,7 @@ private:
     Concoction lastServedConcoction;
     bool hasLastServedOrder;
     bool leaderboardFinalized;
+    std::string lastMessage;
 
     static double totalBarEarnings;
 
@@ -43,7 +44,22 @@ private:
 public:
     Session();
 
-    void run();
+    void runTerminal();
+
+    // GUI Hook methods
+    [[nodiscard]] const Customer* getCurrentCustomer() const { return currentCustomer; }
+    [[nodiscard]] const Concoction& getCurrentDrink() const { return currentDrink; }
+    [[nodiscard]] int getSuccessfulOrderCount() const { return successfulOrderCount; }
+    [[nodiscard]] bool getIsShiftComplete() const { return isShiftComplete(); }
+    [[nodiscard]] const std::string& getLastMessage() const { return lastMessage; }
+    void setLastMessage(const std::string& msg) { lastMessage = msg; }
+    void clearMessage() { lastMessage.clear(); }
+
+    void pourIngredient(const std::string& ingredientName, int amount);
+    void serveCurrentDrink();
+    void serveLastDrink();
+    void discardCurrentDrink();
+    void refuseCurrentCustomer();
 
     [[nodiscard]] double getDailyProfit() const;
     [[nodiscard]] std::string getCurrentClockTime() const;
