@@ -6,7 +6,7 @@
 ## Description
 
 Bartender Simulator is an interactive terminal game, played through text commands.
-You are playing the role of a bartender, operating a nightly shift at a busy bar. Customers come up to you and ask for different drinks off the menu. Your job is to follow the recipes as closely as possible and get as many tips as you can by the end of the night.
+You are playing the role of a bartender, operating a night shift at a busy bar. Customers come up to you and ask for different drinks off the menu. Your job is to follow the recipes as closely as possible and get as many tips as you can by the end of the night.
 
 ## Gameplay & Mechanics
 
