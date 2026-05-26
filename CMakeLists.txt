@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.26)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
 
 # NOTE: update executable name in .github/workflows/cmake.yml:25 when changing executable name in this file
 # for now, the project name is used as the executable name
@@ -125,6 +126,8 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/SFML/SFML.git
         GIT_TAG 3.0.0
 )
+set(SFML_BUILD_AUDIO OFF CACHE BOOL "" FORCE)
+set(SFML_BUILD_NETWORK OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(SFML)
 
 ###############################################################################

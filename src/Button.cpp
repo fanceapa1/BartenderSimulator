@@ -18,7 +18,6 @@ Button::Button(const std::string& label, const sf::Font& font, const sf::Vector2
 
 void Button::setPosition(const sf::Vector2f& position) {
     shape.setPosition(position);
-    sf::FloatRect textBounds = text.getLocalBounds();
     text.setPosition({position.x + shape.getSize().x / 2.0f, position.y + shape.getSize().y / 2.0f});
 }
 
@@ -74,7 +73,7 @@ void Button::render(sf::RenderWindow& window) const {
 }
 
 bool Button::isClicked(const sf::Vector2f& mousePos, bool mousePressed) const {
-    return isHovered && mousePressed;
+    return shape.getGlobalBounds().contains(mousePos) && mousePressed;
 }
 
 const std::string& Button::getLabel() const {

@@ -192,7 +192,7 @@ void GameApp::renderGameplay() {
     const sf::Texture* bgTex = assets.getBackgroundTexture();
     if (bgTex && bgTex->getSize().x > 0) {
         sf::Sprite bgSprite(*bgTex);
-        bgSprite.setScale(1280.f / bgTex->getSize().x, 720.f / bgTex->getSize().y);
+        bgSprite.setScale({1280.f / bgTex->getSize().x, 720.f / bgTex->getSize().y});
         window.draw(bgSprite);
     }
 
