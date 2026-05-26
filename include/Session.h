@@ -40,8 +40,12 @@ private:
 
     [[nodiscard]] bool isShiftComplete() const;
 
-public:
     Session();
+    Session(const Session&) = delete;
+    Session& operator=(const Session&) = delete;
+
+public:
+    static Session& getInstance();
 
     void run();
 

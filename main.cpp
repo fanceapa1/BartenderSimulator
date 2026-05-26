@@ -1,7 +1,6 @@
 #include "Session.h"
 
 int main() {
-    Session session;
-    session.run();
+    Session::getInstance().run();
     return 0;
 }

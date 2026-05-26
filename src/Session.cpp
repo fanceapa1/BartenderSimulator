@@ -54,6 +54,11 @@ std::vector<std::string> makePossibleNames() {
 
 double Session::totalBarEarnings = 0;
 
+Session& Session::getInstance() {
+    static Session instance;
+    return instance;
+}
+
 Session::Session()
     : currentMinuteOfShift(0),
       dailyProfit(0),
