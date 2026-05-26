@@ -1,7 +1,7 @@
-#include "Session.h"
+#include "GameApp.h"
 
 int main() {
-    Session session;
-    session.run();
+    GameApp app;
+    app.run();
     return 0;
 }

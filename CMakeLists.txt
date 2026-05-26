@@ -114,12 +114,18 @@ include(FetchContent)
 # NOTE: Also update env vars used for caching in
 #         - .github/actions/configure-cmake/action.yml
 #         - .github/workflows/cmake.yml
- FetchContent_Declare(
-         googletest
-         URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
- )
-#
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
+)
 FetchContent_MakeAvailable(googletest)
+
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0
+)
+FetchContent_MakeAvailable(SFML)
 
 ###############################################################################
 
@@ -147,7 +153,7 @@ target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE generated/incl
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ext/<SomeHppLib>/include)
 # target_include_directories(${MAIN_EXECUTABLE_NAME} SYSTEM PRIVATE ${<SomeLib>_SOURCE_DIR}/include)
 # target_link_directories(${MAIN_EXECUTABLE_NAME} PRIVATE ${<SomeLib>_BINARY_DIR}/lib)
-# target_link_libraries(${MAIN_EXECUTABLE_NAME} <SomeLib>)
+target_link_libraries(${MAIN_EXECUTABLE_NAME} PRIVATE SFML::Graphics SFML::Window SFML::System)
 
 ###############################################################################
 
