@@ -18,6 +18,7 @@ public:
     void setPosition(const sf::Vector2f& position);
     void setSize(const sf::Vector2f& size);
     void setLabel(const std::string& label);
+    void setTexture(const sf::Texture* texture);
 
     void update(const sf::Vector2f& mousePos);
     void render(sf::RenderWindow& window) const;

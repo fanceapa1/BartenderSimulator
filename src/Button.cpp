@@ -30,15 +30,41 @@ void Button::setSize(const sf::Vector2f& size) {
 void Button::setLabel(const std::string& label) {
     labelStr = label;
     text.setString(label);
-    setPosition(shape.getPosition());
+    if (shape.getTexture() != nullptr) {
+        setTexture(shape.getTexture());
+    } else {
+        setPosition(shape.getPosition());
+    }
+}
+
+void Button::setTexture(const sf::Texture* texture) {
+    if (texture) {
+        shape.setTexture(texture);
+        shape.setFillColor(sf::Color::White);
+        shape.setOutlineThickness(0.f);
+        
+        sf::FloatRect textBounds = text.getLocalBounds();
+        text.setOrigin({textBounds.position.x + textBounds.size.x / 2.0f, textBounds.position.y});
+        text.setPosition({shape.getPosition().x + shape.getSize().x / 2.0f, shape.getPosition().y + shape.getSize().y + 5.f});
+    } else {
+        shape.setTexture(nullptr);
+        shape.setFillColor(sf::Color(100, 100, 100));
+        shape.setOutlineThickness(2.f);
+        
+        sf::FloatRect textBounds = text.getLocalBounds();
+        text.setOrigin({textBounds.position.x + textBounds.size.x / 2.0f, textBounds.position.y + textBounds.size.y / 2.0f});
+        text.setPosition({shape.getPosition().x + shape.getSize().x / 2.0f, shape.getPosition().y + shape.getSize().y / 2.0f});
+    }
 }
 
 void Button::update(const sf::Vector2f& mousePos) {
     isHovered = shape.getGlobalBounds().contains(mousePos);
     if(isHovered) {
-        shape.setFillColor(sf::Color(150, 150, 150));
+        if (shape.getTexture() == nullptr) shape.setFillColor(sf::Color(150, 150, 150));
+        else shape.setFillColor(sf::Color(200, 200, 200));
     } else {
-        shape.setFillColor(sf::Color(100, 100, 100));
+        if (shape.getTexture() == nullptr) shape.setFillColor(sf::Color(100, 100, 100));
+        else shape.setFillColor(sf::Color::White);
     }
 }
 

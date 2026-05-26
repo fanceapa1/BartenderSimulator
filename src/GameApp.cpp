@@ -6,7 +6,8 @@
 
 GameApp::GameApp() : window(sf::VideoMode({1280, 720}), "Bartender Simulator GUI"), isMenuOpen(false), isLeaderboardScreen(false) {
     window.setFramerateLimit(60);
-    assets.loadFont("assets/fonts/arial.ttf"); // Assume this is the fallback path or we will download one if needed
+    assets.loadFont("assets/fonts/arial.ttf"); 
+    assets.loadTextures();
     initUI();
 }
 
@@ -18,19 +19,20 @@ void GameApp::initUI() {
 
     const sf::Font& font = assets.getMainFont();
 
-    // Ingredients (3 columns)
+    // Ingredients (5x4 grid)
     std::vector<std::string> ingredients = {
         "Gin", "Vodka", "Rum", "Whiskey", "Tequila", "Vermouth", "Aperol", "Sparkling Wine",
         "Tonic", "Soda", "Orange Juice", "Cola", "Ginger Beer", "Simple Syrup", "Grenadine",
         "Ice", "Lemon", "Lime", "Orange", "Grapefruit"
     };
 
-    float startX = 800.f;
+    float startX = 750.f;
     float startY = 100.f;
     for (size_t i = 0; i < ingredients.size(); ++i) {
-        float x = startX + (i % 3) * 150.f;
-        float y = startY + (i / 3) * 50.f;
-        ingredientButtons.emplace_back(ingredients[i], font, sf::Vector2f(x, y), sf::Vector2f(140.f, 40.f));
+        float x = startX + (i % 5) * 90.f;
+        float y = startY + (i / 5) * 100.f;
+        ingredientButtons.emplace_back(ingredients[i], font, sf::Vector2f(x, y), sf::Vector2f(60.f, 60.f));
+        ingredientButtons.back().setTexture(assets.getIngredientTexture(ingredients[i]));
     }
 
     // Amounts
@@ -169,6 +171,12 @@ void GameApp::render() {
     if (isLeaderboardScreen) {
         renderLeaderboard();
     } else if (isMenuOpen) {
+        const sf::Texture* bgTex = assets.getBackgroundTexture();
+        if (bgTex && bgTex->getSize().x > 0) {
+            sf::Sprite bgSprite(*bgTex);
+            bgSprite.setScale({1280.f / bgTex->getSize().x, 720.f / bgTex->getSize().y});
+            window.draw(bgSprite);
+        }
         renderMenu();
         actionButtons[4].render(window); // Render Menu button over it to close
     } else {
@@ -180,6 +188,13 @@ void GameApp::render() {
 
 void GameApp::renderGameplay() {
     if (!assets.isFontLoaded()) return;
+
+    const sf::Texture* bgTex = assets.getBackgroundTexture();
+    if (bgTex && bgTex->getSize().x > 0) {
+        sf::Sprite bgSprite(*bgTex);
+        bgSprite.setScale(1280.f / bgTex->getSize().x, 720.f / bgTex->getSize().y);
+        window.draw(bgSprite);
+    }
 
     sf::Text text(assets.getMainFont());
     text.setCharacterSize(20);
@@ -200,7 +215,7 @@ void GameApp::renderGameplay() {
     if (cust) {
         std::ostringstream custInfo;
         custInfo << "Customer: " << cust->getName() << " (" << cust->getType() << ")";
-        if (cust->isDrunk()) custInfo << " - DRUNK";
+        if (cust->isDrunk()) custInfo << "\n[DRUNK]";
         custInfo << "\nRequest: " << cust->getDrinkRequest().getName();
         
         text.setString(custInfo.str());
@@ -209,7 +224,20 @@ void GameApp::renderGameplay() {
         
         sf::RectangleShape custSprite({200.f, 300.f});
         custSprite.setPosition({50.f, 200.f});
-        custSprite.setFillColor(sf::Color(100, 150, 200));
+        
+        std::string name = cust->getName();
+        bool isFemale = false;
+        if ((name.back() == 'a' && name != "Luca") || name == "Carmen") {
+            isFemale = true;
+        }
+
+        const sf::Texture* tex = assets.getCustomerTexture(cust->getType(), isFemale);
+        if (tex) {
+            custSprite.setTexture(tex);
+            custSprite.setFillColor(sf::Color::White);
+        } else {
+            custSprite.setFillColor(sf::Color(100, 150, 200));
+        }
         window.draw(custSprite);
     }
 
